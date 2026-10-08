@@ -23,8 +23,10 @@ def write(raw: Path, name: str, rows: list[list]) -> None:
 
 def crew_row(home="الأهلي", away="إنبي", date="2026-08-23", rnd=1,
              referee="محمود احمد ناجي", ar1="سمير جمال سعد محمد", var=None):
-    #       season,   round, date, home, away, ref, ar1, ar2, 4th, var, avar, observer, url
-    return ["2026/27", rnd, date, home, away, referee, ar1, "", "", var or "", "", "", URL]
+    # season, round, date, time, stadium, home, away,
+    # ref, ar1, ar2, 4th, var, avar, commissioner, assessor, url
+    return ["2026/27", rnd, date, "20:00", "", home, away,
+            referee, ar1, "", "", var or "", "", "", "", URL]
 
 
 @pytest.fixture
@@ -176,3 +178,10 @@ def test_excel_bom_is_handled(raw):
     write(raw, "crews", [crew_row()])
     _, counts = build(raw)
     assert counts["matches"] == 1
+
+
+def test_bad_kickoff_time_rejected(raw):
+    row = crew_row()
+    row[3] = "8:00 PM"
+    write(raw, "crews", [row])
+    assert "must be HH:MM" in problems_of(raw)

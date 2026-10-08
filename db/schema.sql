@@ -28,7 +28,7 @@ CREATE TABLE officials (
     nationality    TEXT    NOT NULL DEFAULT 'Egypt',   -- separates foreign crews
     region         TEXT,                               -- المنطقة, e.g. 'الغربية'
     official_type  TEXT    NOT NULL DEFAULT 'referee'
-                   CHECK (official_type IN ('referee', 'observer'))
+                   CHECK (official_type IN ('referee', 'commissioner', 'assessor'))
 );
 
 -- one row = one way a name has been written somewhere
@@ -96,7 +96,8 @@ CREATE TABLE match_officials (
                      'fourth',        -- الحكم الاحتياطي
                      'var',           -- حكم مساعد فيديو
                      'avar',          -- حكم مساعد فيديو 2
-                     'observer'       -- مراقب المباريات
+                     'commissioner',  -- مراقب المباراة (match organisation)
+                     'assessor'       -- مقيّم الحكام (writes the referee evaluation)
                  )),
     PRIMARY KEY (match_id, role),
     UNIQUE (match_id, official_id)          -- one person can't hold two roles

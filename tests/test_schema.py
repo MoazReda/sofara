@@ -41,7 +41,7 @@ def _seed(c: sqlite3.Connection) -> None:
             (2, "سمير جمال سعد محمد", "القاهرة", "referee"),
             (3, "محمد مجدي محمد سليمان", "الإسماعيلية", "referee"),
             (4, "هشام اشرف فتحي احمد", "أسيوط", "referee"),
-            (5, "اشرف السيد محمد مسعود", "القليوبية", "observer"),
+            (5, "اشرف السيد محمد مسعود", "القليوبية", "commissioner"),
             (6, "خالد جمال محمود الغندور", "القاهرة", "referee"),
             (7, "السيد ابراهيم شعبان", "الدقهلية", "referee"),
         ],
@@ -57,7 +57,7 @@ def _seed(c: sqlite3.Connection) -> None:
     c.executemany(
         "INSERT INTO match_officials (match_id, official_id, role) VALUES (1, ?, ?)",
         [(1, "referee"), (2, "assistant_1"), (3, "assistant_2"), (4, "fourth"),
-         (5, "observer"), (6, "var"), (7, "avar")],
+         (5, "commissioner"), (6, "var"), (7, "avar")],
     )
     # (team, type, minute, added, person_type, name, number, reason, is_pen)
     events = [

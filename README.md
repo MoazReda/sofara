@@ -5,7 +5,7 @@ built on **real, public data only**.
 
 ## Status
 - [x] Database schema + tests
-- [~] Officials registry (loader done, data collection next)
+- [~] Officials registry (round 1 loaded: 10 matches, 60 officials)
 - [ ] Case library (part B)
 - [ ] Appointment assistant (part A)
 - [ ] Expert-opinion analysis (part C)
@@ -47,7 +47,7 @@ Full definitions with comments: [`db/schema.sql`](db/schema.sql).
 Field layout follows the official EFA referee match report.
 
 Key rules enforced by the database itself:
-- One person per role per match (referee, ARs, fourth, VAR, AVAR, observer).
+- One person per role per match (referee, ARs, fourth, VAR, AVAR, commissioner, assessor).
 - Name variants resolve to one official via `official_aliases`.
 - `90+5` is stored as `minute=90, added_minute=5`; added time only at 45/90/105/120.
 - Card reasons follow Law 12 categories.

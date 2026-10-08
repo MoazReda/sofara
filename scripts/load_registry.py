@@ -5,9 +5,10 @@ CSV files (all UTF-8; Excel: "CSV UTF-8" format):
     team_aliases.csv       alias, team_name_ar, source
     officials.csv          name_ar, name_en, nationality, region, official_type
     official_aliases.csv   alias, official_name_ar, source
-    crews.csv              season, round, match_date, home_team, away_team,
-                           referee, assistant_1, assistant_2, fourth, var, avar,
-                           observer, source_url
+    crews.csv              season, round, match_date, kickoff_time, stadium,
+                           home_team, away_team, referee, assistant_1,
+                           assistant_2, fourth, var, avar, commissioner,
+                           assessor, source_url
 
 Why crews.csv is "wide" (one row per match) while match_officials is
 "long" (one row per person per role): the CSV is designed for a human
@@ -28,18 +29,20 @@ from pathlib import Path
 
 from normalize import normalize_name
 
-ROLES = ["referee", "assistant_1", "assistant_2", "fourth", "var", "avar", "observer"]
+ROLES = ["referee", "assistant_1", "assistant_2", "fourth", "var", "avar",
+         "commissioner", "assessor"]
 DEFAULTS = {"nationality": "Egypt", "official_type": "referee"}
 DATE_RE =re.compile(r"^\d{4}-\d{2}-\d{2}$")
 SEASON_RE = re.compile(r"^\d{4}/\d{2}$")
+TIME_RE = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
 
 FILES = {
     "teams": ["name_ar", "name_en"],
     "team_aliases": ["alias", "team_name_ar", "source"],
     "officials": ["name_ar", "name_en", "nationality", "region", "official_type"],
     "official_aliases": ["alias", "official_name_ar", "source"],
-    "crews": ["season", "round", "match_date", "home_team", "away_team",
-              *ROLES, "source_url"],
+    "crews": ["season", "round", "match_date", "kickoff_time", "stadium",
+              "home_team", "away_team", *ROLES, "source_url"],
 }
 
 
@@ -151,6 +154,9 @@ def _load_crews(conn, rows, team_lookup, official_lookup, problems):
         if not row["match_date"] or not DATE_RE.match(row["match_date"]):
             problems.append(f"{where}: match_date '{row['match_date']}' must be YYYY-MM-DD")
             ok = False
+        if row["kickoff_time"] and not TIME_RE.match(row["kickoff_time"]):
+            problems.append(f"{where}: kickoff_time '{row['kickoff_time']}' must be HH:MM (24h)")
+            ok = False
 
         teams = {}
         for side in ("home_team", "away_team"):
@@ -210,11 +216,11 @@ def _load_crews(conn, rows, team_lookup, official_lookup, problems):
     for row, teams, crew in parsed:
         try:
             cur = conn.execute(
-                """INSERT INTO matches (season, round, match_date, home_team_id,
-                       away_team_id, source)
-                   VALUES (?, ?, ?, ?, ?, ?)""",
-                (row["season"], int(row["round"]), row["match_date"],
-                 teams["home_team"], teams["away_team"], row["source_url"]),
+                """INSERT INTO matches (season, round, match_date, kickoff_time, stadium,
+                       home_team_id, away_team_id, source)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                (row["season"], int(row["round"]), row["match_date"], row["kickoff_time"],
+                 row["stadium"], teams["home_team"], teams["away_team"], row["source_url"]),
             )
         except sqlite3.IntegrityError as e:
             problems.append(f"{row['_line']}: {e}")
