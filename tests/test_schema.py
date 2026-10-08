@@ -207,3 +207,10 @@ def test_stance_limited_to_three_values(db):
             """INSERT INTO expert_opinions (incident_id, expert_id, stance, summary_ar,
                    source_name, source_url) VALUES (1, 1, 'maybe', 's', 'n', 'u')"""
         )
+
+
+def test_one_role_per_person_per_match(db):
+    # official 1 is already the referee of match 1
+    db.execute("DELETE FROM match_officials WHERE role = 'var'")
+    with pytest.raises(sqlite3.IntegrityError):
+        db.execute("INSERT INTO match_officials VALUES (1, 1, 'var')")

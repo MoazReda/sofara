@@ -5,7 +5,7 @@ built on **real, public data only**.
 
 ## Status
 - [x] Database schema + tests
-- [ ] Officials registry
+- [~] Officials registry (loader done, data collection next)
 - [ ] Case library (part B)
 - [ ] Appointment assistant (part A)
 - [ ] Expert-opinion analysis (part C)
@@ -17,6 +17,24 @@ pip install pytest
 python scripts/build_db.py          # creates data/sofara.db
 python -m pytest -q                 # runs schema tests
 ```
+
+## Data workflow
+`data/raw/*.csv` is the **source of truth**; `data/sofara.db` is rebuilt from it
+(and is git-ignored). To fix data: edit the CSV, rebuild. Never edit the db.
+
+| file | one row = |
+|---|---|
+| `teams.csv`, `team_aliases.csv` | a team / another spelling of a team |
+| `officials.csv`, `official_aliases.csv` | an official / another spelling of one |
+| `crews.csv` | one match and its announced crew (empty cell = role not announced) |
+
+The loader is strict: it reports **every** problem at once and writes nothing
+until all are fixed. Names are matched after normalizing spelling noise
+(أ/إ/ا، ة/ه، ى/ي، diacritics, spaces) but are **never guessed** — an unknown
+name must be added to `officials.csv` (new person) or `official_aliases.csv`
+(new spelling of a known person).
+
+Editing in Excel: save as **CSV UTF-8**, otherwise Arabic text breaks.
 
 ## Schema
 ```

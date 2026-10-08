@@ -98,7 +98,8 @@ CREATE TABLE match_officials (
                      'avar',          -- حكم مساعد فيديو 2
                      'observer'       -- مراقب المباريات
                  )),
-    PRIMARY KEY (match_id, role)
+    PRIMARY KEY (match_id, role),
+    UNIQUE (match_id, official_id)          -- one person can't hold two roles
 );
 
 -- ---------------------------------------------------------------------
