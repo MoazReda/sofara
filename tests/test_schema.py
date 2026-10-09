@@ -171,42 +171,167 @@ def test_alias_resolves_to_same_official(db):
 
 # ---------- incidents: verdict rules ----------
 
-def _incident(db, verdict=None, url=None):
+# ---------- case library: incidents / decisions / sanctions ----------
+# A test case, not a real ruling: handball in the box, on-field play on,
+# VAR -> penalty + red card (DOGSO by handball) to an ENPPI defender.
+# Team 1 = Al Ahly, team 2 = ENPPI.
+
+def _incident(db) -> int:
+    cur = db.execute(
+        """INSERT INTO incidents (match_id, minute, description_ar, var_review)
+           VALUES (1, 68, 'لمسة يد داخل منطقة الجزاء (حالة اختبار)', 'ofr')""")
+    return cur.lastrowid
+
+
+def _decision(db, iid, stage, offence="none", team=None, outcome="play_on", url=None):
     db.execute(
-        """INSERT INTO incidents (match_id, minute, incident_type, description_ar,
-               on_field_decision, final_decision, official_verdict, verdict_source_url)
-           VALUES (1, 68, 'penalty', 'وصف تجريبي', 'penalty', 'penalty', ?, ?)""",
-        (verdict, url),
-    )
+        """INSERT INTO incident_decisions
+               (incident_id, stage, offence, offending_team_id, outcome, source_url)
+           VALUES (?, ?, ?, ?, ?, ?)""", (iid, stage, offence, team, outcome, url))
 
 
-def test_verdict_requires_public_source(db):
+def _card(db, iid, stage, sanction="red", reason="denying_goal_handball",
+          team=2, person="مدافع إنبي"):
+    db.execute(
+        """INSERT INTO incident_sanctions (incident_id, stage, team_id, person_name,
+               sanction, reason) VALUES (?, ?, ?, ?, ?, ?)""",
+        (iid, stage, team, person, sanction, reason))
+
+
+def _var_overturned(db) -> int:
+    iid = _incident(db)
+    _decision(db, iid, "on_field")
+    _decision(db, iid, "final", "handball", 2, "penalty")
+    _card(db, iid, "final")
+    return iid
+
+
+def _summary(db, col):
+    return db.execute(f"SELECT {col} FROM v_incident_summary").fetchone()[0]
+
+
+def test_summary_shows_both_stages_and_var_change(db):
+    _var_overturned(db)
+    row = db.execute("""SELECT on_field_outcome, final_offence, final_outcome,
+                               var_changed, referee_id FROM v_incident_summary""").fetchone()
+    assert row == ("play_on", "handball", "penalty", 1, 1)
+
+
+def test_no_final_row_means_final_equals_on_field(db):
+    iid = _incident(db)
+    _decision(db, iid, "on_field", "foul", 2, "penalty")
+    assert _summary(db, "final_outcome") == "penalty"
+    assert _summary(db, "var_changed") == 0
+
+
+def test_only_a_card_change_still_counts_as_var_change(db):
+    iid = _incident(db)
+    _decision(db, iid, "on_field", "foul", 2, "free_kick")
+    _card(db, iid, "on_field", "yellow", "unsporting_behaviour")
+    _decision(db, iid, "final", "foul", 2, "free_kick")
+    _card(db, iid, "final", "red", "serious_foul_play")
+    assert _summary(db, "var_changed") == 1
+
+
+def test_no_official_ruling_means_controversial(db):
+    _var_overturned(db)
+    assert _summary(db, "status") == "controversial"
+    assert _summary(db, "verdict") is None
+
+
+def test_official_ruling_matching_final_is_correct(db):
+    iid = _var_overturned(db)
+    _decision(db, iid, "official", "handball", 2, "penalty", url="https://example.org/r")
+    _card(db, iid, "official")
+    assert (_summary(db, "status"), _summary(db, "verdict")) == ("ruled", "correct")
+
+
+def test_official_ruling_with_different_card_is_incorrect(db):
+    iid = _var_overturned(db)
+    _decision(db, iid, "official", "handball", 2, "penalty", url="https://example.org/r")
+    _card(db, iid, "official", "yellow", "unsporting_behaviour")   # should've been yellow
+    assert _summary(db, "verdict") == "incorrect"
+
+
+def test_official_ruling_requires_source(db):
+    iid = _var_overturned(db)
     with pytest.raises(sqlite3.IntegrityError):
-        _incident(db, verdict="correct", url=None)
+        _decision(db, iid, "official", "handball", 2, "penalty", url=None)
 
 
-def test_no_verdict_means_controversial(db):
+def test_one_decision_per_stage(db):
+    iid = _var_overturned(db)
+    with pytest.raises(sqlite3.IntegrityError):
+        _decision(db, iid, "final", "foul", 2, "free_kick")
+
+
+@pytest.mark.parametrize("offence,team,outcome", [
+    ("none", None, "penalty"),          # penalty without an offence
+    ("offside", 1, "penalty"),          # penalty for offside
+    ("offside", 1, "play_on"),          # offside but play continued
+    ("foul", None, "free_kick"),        # offence without offending team
+    ("none", 1, "play_on"),             # offending team without offence
+])
+def test_impossible_decisions_rejected(db, offence, team, outcome):
+    iid = _incident(db)
+    with pytest.raises(sqlite3.IntegrityError):
+        _decision(db, iid, "on_field", offence, team, outcome)
+
+
+def test_offending_team_must_have_played(db):
+    db.execute("INSERT INTO teams (team_id, name_ar) VALUES (3, 'الزمالك')")
+    iid = _incident(db)
+    with pytest.raises(sqlite3.IntegrityError, match="did not play"):
+        _decision(db, iid, "on_field", "foul", 3, "free_kick")
+
+
+def test_sanction_needs_its_decision_first(db):
+    iid = _incident(db)                 # no 'final' decision row yet
+    with pytest.raises(sqlite3.IntegrityError):
+        _card(db, iid, "final")
+
+
+@pytest.mark.parametrize("sanction,reason", [
+    ("yellow", "violent_conduct"),      # red-card reason on a yellow
+    ("red", "dissent"),                 # yellow-card reason on a red
+    ("red", "second_caution"),          # that's a second_yellow, not a direct red
+])
+def test_card_reason_must_fit(db, sanction, reason):
+    iid = _incident(db)
+    _decision(db, iid, "on_field", "foul", 2, "free_kick")
+    with pytest.raises(sqlite3.IntegrityError, match="does not fit"):
+        _card(db, iid, "on_field", sanction, reason)
+
+
+def test_two_people_carded_in_one_incident(db):
+    iid = _incident(db)
+    _decision(db, iid, "on_field", "violent_conduct", 2, "free_kick")
+    _card(db, iid, "on_field", "red", "violent_conduct", team=2, person="مدافع")
+    _card(db, iid, "on_field", "yellow", "unsporting_behaviour", team=1, person="مهاجم")
+    assert db.execute("SELECT COUNT(*) FROM incident_sanctions").fetchone()[0] == 2
+
+
+def test_match_event_reason_must_fit(db):
+    with pytest.raises(sqlite3.IntegrityError, match="does not fit"):
+        db.execute("""INSERT INTO match_events (match_id, team_id, event_type, minute, reason)
+                      VALUES (1, 1, 'yellow', 50, 'violent_conduct')""")
+
+
+def test_missing_on_field_decision_is_flagged(db):
     _incident(db)
-    status, ref = db.execute("SELECT status, referee_id FROM v_incidents").fetchone()
-    assert status == "controversial"
-    assert ref == 1
-
-
-def test_published_verdict_means_ruled(db):
-    _incident(db, verdict="correct", url="https://example.org/ruling")
-    assert db.execute("SELECT status FROM v_incidents").fetchone()[0] == "ruled"
+    assert db.execute("SELECT problem FROM v_incident_problems").fetchone()[0] \
+        == "missing on_field decision"
 
 
 # ---------- expert opinions ----------
 
 def test_stance_limited_to_three_values(db):
-    _incident(db)
+    iid = _incident(db)
     db.execute("INSERT INTO experts (expert_id, name_ar, background) VALUES (1, 'خبير', 'ex_referee')")
     with pytest.raises(sqlite3.IntegrityError):
         db.execute(
             """INSERT INTO expert_opinions (incident_id, expert_id, stance, summary_ar,
-                   source_name, source_url) VALUES (1, 1, 'maybe', 's', 'n', 'u')"""
-        )
+                   source_name, source_url) VALUES (?, 1, 'maybe', 's', 'n', 'u')""", (iid,))
 
 
 def test_one_role_per_person_per_match(db):

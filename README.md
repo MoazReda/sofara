@@ -48,7 +48,8 @@ Editing in Excel: save as **CSV UTF-8**, otherwise Arabic text breaks.
 teams ──< matches >── match_officials >── officials ──< official_aliases
              │
              ├──< match_events          (goals & cards, whole season)
-             └──< incidents ──< expert_opinions >── experts
+             └──< incidents ──< incident_decisions ──< incident_sanctions
+                      └──< expert_opinions >── experts
 ```
 Full definitions with comments: [`db/schema.sql`](db/schema.sql).
 Field layout follows the official EFA referee match report.
@@ -57,9 +58,12 @@ Key rules enforced by the database itself:
 - One person per role per match (referee, ARs, fourth, VAR, AVAR, commissioner, assessor).
 - Name variants resolve to one official via `official_aliases`.
 - `90+5` is stored as `minute=90, added_minute=5`; added time only at 45/90/105/120.
-- Card reasons follow Law 12 categories.
-- An incident gets an `official_verdict` **only** with a public source URL;
-  otherwise it is *controversial* (derived in `v_incidents`, never stored).
+- Card reasons come from the `card_reasons` table (Law 12); a yellow card can't
+  carry a sending-off reason and vice versa.
+- Case library: an incident has one decision per stage (`on_field` → `final` →
+  `official`) and any number of cards per stage. An `official` stage needs a
+  public source URL. "Correct / incorrect" and "controversial" are **computed**
+  in `v_incident_summary`, never stored.
 
 ## Data & ethics rules
 - No scraping against any site's terms.

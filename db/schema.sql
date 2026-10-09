@@ -104,6 +104,32 @@ CREATE TABLE match_officials (
 );
 
 -- ---------------------------------------------------------------------
+-- card_reasons: one row = one Law 12 reason for a card.
+-- A lookup table instead of a CHECK list copied into two tables;
+-- `kind` lets the database refuse e.g. a yellow card with a red-card reason.
+-- ---------------------------------------------------------------------
+CREATE TABLE card_reasons (
+    code     TEXT PRIMARY KEY,
+    name_ar  TEXT NOT NULL,
+    kind     TEXT NOT NULL CHECK (kind IN ('caution', 'sending_off'))
+);
+
+INSERT INTO card_reasons (code, name_ar, kind) VALUES
+    ('unsporting_behaviour',                'السلوك غير الرياضي',              'caution'),
+    ('dissent',                             'المعارضة بالقول أو الفعل',         'caution'),
+    ('persistent_offences',                 'تكرار المخالفات',                  'caution'),
+    ('delaying_restart',                    'تأخير استئناف اللعب',              'caution'),
+    ('failing_to_respect_distance',         'عدم احترام المسافة',               'caution'),
+    ('entering_leaving_without_permission', 'الدخول أو الخروج بدون إذن',         'caution'),
+    ('serious_foul_play',                   'اللعب العنيف الجسيم',              'sending_off'),
+    ('violent_conduct',                     'السلوك العنيف',                    'sending_off'),
+    ('spitting_biting',                     'البصق أو العض',                    'sending_off'),
+    ('denying_goal_handball',               'منع هدف أو فرصة محققة بلمسة يد',    'sending_off'),
+    ('denying_goal_foul',                   'منع فرصة محققة بمخالفة (DOGSO)',     'sending_off'),
+    ('offensive_language',                  'ألفاظ أو إشارات مسيئة',            'sending_off'),
+    ('second_caution',                      'إنذار ثانٍ في نفس المباراة',        'sending_off');
+
+-- ---------------------------------------------------------------------
 -- match_events: one row = one goal or one card.
 -- Bulk facts for the whole season (feeds the appointment assistant).
 -- Curated, debated situations go to `incidents`, not here.
@@ -122,23 +148,7 @@ CREATE TABLE match_events (
                   CHECK (person_type IN ('player', 'staff')),
     person_name   TEXT,
     shirt_number  INTEGER CHECK (shirt_number BETWEEN 1 AND 99),
-    reason        TEXT    CHECK (reason IN (
-                      -- cautions (الإنذارات)
-                      'unsporting_behaviour',     -- السلوك غير الرياضي
-                      'dissent',                  -- المعارضة بالقول أو الفعل
-                      'persistent_offences',
-                      'delaying_restart',
-                      'failing_to_respect_distance',
-                      'entering_leaving_without_permission',
-                      -- sendings-off (حالات الطرد)
-                      'serious_foul_play',
-                      'violent_conduct',          -- السلوك العنيف
-                      'spitting_biting',
-                      'denying_goal_handball',
-                      'denying_goal_foul',        -- DOGSO
-                      'offensive_language',
-                      'second_caution'
-                  )),
+    reason        TEXT    REFERENCES card_reasons(code),
     is_penalty    INTEGER NOT NULL DEFAULT 0 CHECK (is_penalty IN (0, 1)),
     is_own_goal   INTEGER NOT NULL DEFAULT 0 CHECK (is_own_goal IN (0, 1)),
     source        TEXT,
@@ -153,35 +163,71 @@ CREATE TABLE match_events (
 );
 
 -- ---------------------------------------------------------------------
--- incidents: one row = one curated refereeing situation (case library).
--- official_verdict stays NULL unless the committee published a ruling;
--- a NULL verdict means "controversial" — computed in v_incidents,
--- never stored as its own column.
+-- Case library (part ب) — three tables, one question each:
+--   incidents           what happened (never changes)
+--   incident_decisions  what was decided, at each stage
+--   incident_sanctions  who got which card, at each stage
+--
+-- Stages: on_field (the referee) -> final (after VAR) -> official
+-- (a ruling published by the committee). Adding a stage = a new value,
+-- not new columns. "Was the decision correct?" is NOT stored: it is
+-- computed by comparing `final` with `official` (see v_incident_summary).
+-- No `official` row = controversial.
 -- ---------------------------------------------------------------------
+
+-- one row = one curated refereeing situation (a Key Match Incident)
 CREATE TABLE incidents (
-    incident_id         INTEGER PRIMARY KEY,
-    match_id            INTEGER NOT NULL REFERENCES matches(match_id),
-    minute              INTEGER NOT NULL CHECK (minute BETWEEN 1 AND 120),
-    added_minute        INTEGER NOT NULL DEFAULT 0 CHECK (added_minute >= 0),
-    incident_type       TEXT    NOT NULL CHECK (incident_type IN (
-                            'penalty', 'handball', 'offside', 'red_card',
-                            'second_yellow', 'goal_validity', 'mistaken_identity',
-                            'other'
-                        )),
-    description_ar      TEXT    NOT NULL,              -- in our own words
-    on_field_decision   TEXT    NOT NULL,              -- what the referee gave
-    var_review          TEXT    NOT NULL DEFAULT 'none'
-                        CHECK (var_review IN ('none', 'check_only', 'ofr')),
-    final_decision      TEXT    NOT NULL,              -- after VAR
-    video_url           TEXT,                          -- link only, never upload
-    video_start_sec     INTEGER CHECK (video_start_sec >= 0),
-    official_verdict    TEXT    CHECK (official_verdict IN ('correct', 'incorrect')),
-    verdict_source_url  TEXT,
+    incident_id      INTEGER PRIMARY KEY,
+    match_id         INTEGER NOT NULL REFERENCES matches(match_id),
+    minute           INTEGER NOT NULL CHECK (minute BETWEEN 1 AND 120),
+    added_minute     INTEGER NOT NULL DEFAULT 0 CHECK (added_minute >= 0),
+    description_ar   TEXT    NOT NULL,                 -- in our own words
+    var_review       TEXT    NOT NULL DEFAULT 'none'
+                     CHECK (var_review IN ('none', 'check_only', 'ofr')),
+    video_url        TEXT,                             -- link only, never upload
+    video_start_sec  INTEGER CHECK (video_start_sec >= 0),
     CHECK (added_minute = 0 OR minute IN (45, 90, 105, 120)),
-    -- a verdict without a public source is not allowed
-    CHECK (official_verdict IS NULL OR verdict_source_url IS NOT NULL),
-    -- a timestamp without a video makes no sense
     CHECK (video_start_sec IS NULL OR video_url IS NOT NULL)
+);
+
+-- one row = the decision on one incident at one stage.
+-- No `final` row means the final decision = the on-field decision.
+CREATE TABLE incident_decisions (
+    incident_id        INTEGER NOT NULL REFERENCES incidents(incident_id),
+    stage              TEXT    NOT NULL CHECK (stage IN ('on_field', 'final', 'official')),
+    offence            TEXT    NOT NULL CHECK (offence IN (
+                           'none', 'foul', 'handball', 'offside',
+                           'simulation', 'violent_conduct', 'other')),
+    offending_team_id  INTEGER REFERENCES teams(team_id),
+    outcome            TEXT    NOT NULL CHECK (outcome IN (
+                           'play_on', 'penalty', 'free_kick',
+                           'goal_awarded', 'goal_disallowed', 'other')),
+    source_url         TEXT,
+    PRIMARY KEY (incident_id, stage),
+    -- an official ruling must be public and linkable
+    CHECK (stage <> 'official' OR source_url IS NOT NULL),
+    -- an offence has an offending team; no offence, no team
+    CHECK ((offence = 'none') = (offending_team_id IS NULL)),
+    -- a penalty or a disallowed goal needs an offence
+    CHECK (outcome NOT IN ('penalty', 'goal_disallowed') OR offence <> 'none'),
+    -- penalties come from fouls / handballs / violent conduct only
+    CHECK (outcome <> 'penalty' OR offence IN ('foul', 'handball', 'violent_conduct')),
+    -- offside: free kick, or the goal is disallowed
+    CHECK (offence <> 'offside' OR outcome IN ('free_kick', 'goal_disallowed'))
+);
+
+-- one row = one card to one person in one incident at one stage.
+-- No card = no row.
+CREATE TABLE incident_sanctions (
+    sanction_id  INTEGER PRIMARY KEY,
+    incident_id  INTEGER NOT NULL,
+    stage        TEXT    NOT NULL,
+    team_id      INTEGER NOT NULL REFERENCES teams(team_id),
+    person_name  TEXT    NOT NULL,
+    sanction     TEXT    NOT NULL CHECK (sanction IN ('yellow', 'second_yellow', 'red')),
+    reason       TEXT    REFERENCES card_reasons(code),
+    FOREIGN KEY (incident_id, stage) REFERENCES incident_decisions(incident_id, stage),
+    UNIQUE (incident_id, stage, person_name)
 );
 
 -- ---------------------------------------------------------------------
@@ -200,7 +246,7 @@ CREATE TABLE expert_opinions (
     incident_id     INTEGER NOT NULL REFERENCES incidents(incident_id),
     expert_id       INTEGER NOT NULL REFERENCES experts(expert_id),
     stance          TEXT    NOT NULL
-                    CHECK (stance IN ('agree', 'disagree', 'unclear')),  -- vs the final decision
+                    CHECK (stance IN ('agree', 'disagree', 'unclear')),  -- vs the effective final decision
     summary_ar      TEXT    NOT NULL,                  -- our summary, never the article text
     source_name     TEXT    NOT NULL,
     source_url      TEXT    NOT NULL,
@@ -214,23 +260,94 @@ CREATE TABLE expert_opinions (
 CREATE INDEX idx_match_officials_official ON match_officials(official_id);
 CREATE INDEX idx_match_events_match       ON match_events(match_id);
 CREATE INDEX idx_incidents_match          ON incidents(match_id);
+CREATE INDEX idx_sanctions_decision       ON incident_sanctions(incident_id, stage);
 CREATE INDEX idx_opinions_incident        ON expert_opinions(incident_id);
 CREATE INDEX idx_official_aliases_off     ON official_aliases(official_id);
+
+-- ---------------------------------------------------------------------
+-- Cross-table rules (a CHECK can only see its own row; triggers can look up)
+-- ---------------------------------------------------------------------
+
+-- card reason must fit the card: yellow -> caution reason, red -> sending-off reason
+CREATE TRIGGER trg_sanction_reason_fits BEFORE INSERT ON incident_sanctions
+WHEN NEW.reason IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM card_reasons r WHERE r.code = NEW.reason AND (
+        (NEW.sanction IN ('yellow', 'second_yellow') AND r.kind = 'caution') OR
+        (NEW.sanction = 'red' AND r.kind = 'sending_off' AND r.code <> 'second_caution')))
+BEGIN SELECT RAISE(ABORT, 'card reason does not fit the sanction'); END;
+
+CREATE TRIGGER trg_event_reason_fits BEFORE INSERT ON match_events
+WHEN NEW.reason IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM card_reasons r WHERE r.code = NEW.reason AND (
+        (NEW.event_type = 'yellow' AND r.kind = 'caution') OR
+        (NEW.event_type = 'second_yellow' AND (r.kind = 'caution' OR r.code = 'second_caution')) OR
+        (NEW.event_type = 'red' AND r.kind = 'sending_off' AND r.code <> 'second_caution')))
+BEGIN SELECT RAISE(ABORT, 'card reason does not fit the card'); END;
+
+-- teams in a decision / sanction must be one of the two teams in that match
+CREATE TRIGGER trg_decision_team_in_match BEFORE INSERT ON incident_decisions
+WHEN NEW.offending_team_id IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM incidents i JOIN matches m ON m.match_id = i.match_id
+    WHERE i.incident_id = NEW.incident_id
+      AND NEW.offending_team_id IN (m.home_team_id, m.away_team_id))
+BEGIN SELECT RAISE(ABORT, 'offending team did not play in this match'); END;
+
+CREATE TRIGGER trg_sanction_team_in_match BEFORE INSERT ON incident_sanctions
+WHEN NOT EXISTS (
+    SELECT 1 FROM incidents i JOIN matches m ON m.match_id = i.match_id
+    WHERE i.incident_id = NEW.incident_id
+      AND NEW.team_id IN (m.home_team_id, m.away_team_id))
+BEGIN SELECT RAISE(ABORT, 'sanctioned team did not play in this match'); END;
 
 -- ---------------------------------------------------------------------
 -- Views
 -- ---------------------------------------------------------------------
 
--- incidents with the derived status + the referee on the pitch
-CREATE VIEW v_incidents AS
+-- one text "signature" per decision (offence | outcome | sorted cards),
+-- so two decisions can be compared with a single `=`
+CREATE VIEW v_decision_signature AS
+SELECT d.incident_id, d.stage,
+       d.offence || '|' || d.outcome || '|' || COALESCE((
+           SELECT group_concat(card, ';') FROM (
+               SELECT s.person_name || ':' || s.sanction || ':' || COALESCE(s.reason, '') AS card
+               FROM incident_sanctions s
+               WHERE s.incident_id = d.incident_id AND s.stage = d.stage
+               ORDER BY card)), '') AS signature
+FROM incident_decisions d;
+
+-- one row per incident: on-field vs final, did VAR change it, verdict
+CREATE VIEW v_incident_summary AS
 SELECT
     i.*,
-    CASE WHEN i.official_verdict IS NULL THEN 'controversial'
-         ELSE 'ruled' END                         AS status,
-    mo.official_id                                AS referee_id
+    mo.official_id                                         AS referee_id,
+    onf.offence                                            AS on_field_offence,
+    onf.outcome                                            AS on_field_outcome,
+    COALESCE(fin.offence, onf.offence)                     AS final_offence,
+    COALESCE(fin.outcome, onf.outcome)                     AS final_outcome,
+    CASE WHEN sf.signature IS NULL THEN 0
+         WHEN sf.signature <> so.signature THEN 1 ELSE 0 END AS var_changed,
+    CASE WHEN off.incident_id IS NULL THEN 'controversial'
+         ELSE 'ruled' END                                  AS status,
+    CASE WHEN off.incident_id IS NULL THEN NULL
+         WHEN COALESCE(sf.signature, so.signature) = sx.signature THEN 'correct'
+         ELSE 'incorrect' END                              AS verdict,
+    off.source_url                                         AS verdict_source_url
 FROM incidents i
 LEFT JOIN match_officials mo
-       ON mo.match_id = i.match_id AND mo.role = 'referee';
+       ON mo.match_id = i.match_id AND mo.role = 'referee'
+LEFT JOIN incident_decisions onf ON onf.incident_id = i.incident_id AND onf.stage = 'on_field'
+LEFT JOIN incident_decisions fin ON fin.incident_id = i.incident_id AND fin.stage = 'final'
+LEFT JOIN incident_decisions off ON off.incident_id = i.incident_id AND off.stage = 'official'
+LEFT JOIN v_decision_signature so ON so.incident_id = i.incident_id AND so.stage = 'on_field'
+LEFT JOIN v_decision_signature sf ON sf.incident_id = i.incident_id AND sf.stage = 'final'
+LEFT JOIN v_decision_signature sx ON sx.incident_id = i.incident_id AND sx.stage = 'official';
+
+-- data-quality check: every incident needs an on-field decision
+CREATE VIEW v_incident_problems AS
+SELECT i.incident_id, 'missing on_field decision' AS problem
+FROM incidents i
+WHERE NOT EXISTS (SELECT 1 FROM incident_decisions d
+                  WHERE d.incident_id = i.incident_id AND d.stage = 'on_field');
 
 -- resolve any spelling (canonical name or alias) to one official_id
 CREATE VIEW v_official_lookup AS
