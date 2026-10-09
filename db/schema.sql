@@ -186,7 +186,7 @@ CREATE TABLE incidents (
                      CHECK (var_review IN ('unknown', 'none', 'check_only', 'ofr')),
     -- how we found the case: press coverage is biased toward big clubs and
     -- loud controversies; a full match review is not. Keep them apart.
-    found_via        TEXT    NOT NULL CHECK (found_via IN ('press', 'match_review')),
+    found_via        TEXT    NOT NULL CHECK (found_via IN ('press', 'expert_review', 'match_review')),
     source_url       TEXT    NOT NULL,                 -- where the facts above come from
     video_url        TEXT,                             -- link only, never upload
     video_start_sec  INTEGER CHECK (video_start_sec >= 0),
