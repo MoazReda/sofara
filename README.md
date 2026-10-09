@@ -5,7 +5,7 @@ built on **real, public data only**.
 
 ## Status
 - [x] Database schema + tests
-- [~] Officials registry (rounds 1-5: 50 matches, 102 officials; 3 items to verify)
+- [~] Officials registry (rounds 1-5: 50 matches, 103 officials)
 - [ ] Case library (part B)
 - [ ] Appointment assistant (part A)
 - [ ] Expert-opinion analysis (part C)
@@ -35,6 +35,13 @@ name must be added to `officials.csv` (new person) or `official_aliases.csv`
 (new spelling of a known person).
 
 Editing in Excel: save as **CSV UTF-8**, otherwise Arabic text breaks.
+
+## Known data issues
+- **'محمد الشناوي'** (VAR, R2 بيراميدز × أبو قير, R5 بترول أسيوط × مودرن سبورت) is stored as
+  its own official, but is almost certainly one of 'محمد أحمد الشناوي' / 'محمد علي الشناوي'.
+  Per-official VAR counts for these three are therefore unreliable until resolved.
+  Fix: add an alias in `official_aliases.csv` and delete the row from `officials.csv`.
+- Commissioner / assessor are not on premier-league crew cards, so those roles are empty.
 
 ## Schema
 ```
