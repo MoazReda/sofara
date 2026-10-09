@@ -179,11 +179,15 @@ CREATE TABLE match_events (
 CREATE TABLE incidents (
     incident_id      INTEGER PRIMARY KEY,
     match_id         INTEGER NOT NULL REFERENCES matches(match_id),
-    minute           INTEGER NOT NULL CHECK (minute BETWEEN 1 AND 120),
+    minute           INTEGER CHECK (minute BETWEEN 1 AND 120),  -- NULL = not reported
     added_minute     INTEGER NOT NULL DEFAULT 0 CHECK (added_minute >= 0),
     description_ar   TEXT    NOT NULL,                 -- in our own words
-    var_review       TEXT    NOT NULL DEFAULT 'none'
-                     CHECK (var_review IN ('none', 'check_only', 'ofr')),
+    var_review       TEXT    NOT NULL DEFAULT 'unknown'
+                     CHECK (var_review IN ('unknown', 'none', 'check_only', 'ofr')),
+    -- how we found the case: press coverage is biased toward big clubs and
+    -- loud controversies; a full match review is not. Keep them apart.
+    found_via        TEXT    NOT NULL CHECK (found_via IN ('press', 'match_review')),
+    source_url       TEXT    NOT NULL,                 -- where the facts above come from
     video_url        TEXT,                             -- link only, never upload
     video_start_sec  INTEGER CHECK (video_start_sec >= 0),
     CHECK (added_minute = 0 OR minute IN (45, 90, 105, 120)),
@@ -237,7 +241,10 @@ CREATE TABLE incident_sanctions (
 CREATE TABLE experts (
     expert_id   INTEGER PRIMARY KEY,
     name_ar     TEXT    NOT NULL UNIQUE,
-    background  TEXT    CHECK (background IN ('ex_referee', 'analyst', 'ex_player', 'journalist'))
+    background  TEXT    CHECK (background IN (
+                    'ex_referee', 'analyst', 'ex_player', 'journalist',
+                    'committee',          -- committee position as REPORTED by the press
+                    'committee_source'))  -- anonymous 'source in the committee'
 );
 
 -- one row = one expert's opinion on one incident from one source

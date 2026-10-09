@@ -8,7 +8,7 @@ CSV files (UTF-8; Excel: "CSV UTF-8"):
                          easy to type). The loader splits it into
                          incidents + incident_decisions.
         case_id, season, round, home_team, away_team, minute, added_minute,
-        var_review, description_ar, video_url, video_start_sec,
+        var_review, found_via, source_url, description_ar, video_url, video_start_sec,
         on_field_offence, on_field_offending_team, on_field_outcome,
         final_offence, final_offending_team, final_outcome,
         official_offence, official_offending_team, official_outcome,
@@ -16,6 +16,9 @@ CSV files (UTF-8; Excel: "CSV UTF-8"):
 
         - `case_id` is a number you choose; it never changes, so cards and
           opinions can point at it.
+        - `minute` may be empty when no source reports it.
+        - `var_review` empty = unknown (never assume 'none').
+        - `found_via`: press | match_review; `source_url`: where the facts come from.
         - Leave all `final_*` empty when VAR changed nothing (final = on-field).
         - Leave all `official_*` empty unless the committee published a ruling.
         - `*_offending_team` is empty exactly when the offence is `none`.
@@ -48,7 +51,8 @@ DECISION_FIELDS = ("offence", "offending_team", "outcome")
 CASE_FILES = {
     "incidents": [
         "case_id", "season", "round", "home_team", "away_team", "minute",
-        "added_minute", "var_review", "description_ar", "video_url", "video_start_sec",
+        "added_minute", "var_review", "found_via", "source_url", "description_ar",
+        "video_url", "video_start_sec",
         *[f"{s}_{f}" for s in STAGES for f in DECISION_FIELDS],
         "official_source_url",
     ],
@@ -118,14 +122,16 @@ def _load_incidents(conn, rows, teams, problems) -> set[int]:
         minute = _int(row["minute"], where, "minute", problems)
         added = _int(row["added_minute"], where, "added_minute", problems, default=0)
         start = _int(row["video_start_sec"], where, "video_start_sec", problems)
-        if minute is None or added is None:
+        if (row["minute"] and minute is None) or added is None:
             continue
         if not _insert(conn,
                        """INSERT INTO incidents (incident_id, match_id, minute, added_minute,
-                              description_ar, var_review, video_url, video_start_sec)
-                          VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                              description_ar, var_review, found_via, source_url,
+                              video_url, video_start_sec)
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                        (case_id, match[0], minute, added, row["description_ar"],
-                        row["var_review"] or "none", row["video_url"], start), where, problems):
+                        row["var_review"] or "unknown", row["found_via"], row["source_url"],
+                        row["video_url"], start), where, problems):
             continue
 
         # one decision row per filled stage

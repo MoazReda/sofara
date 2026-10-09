@@ -178,8 +178,10 @@ def test_alias_resolves_to_same_official(db):
 
 def _incident(db) -> int:
     cur = db.execute(
-        """INSERT INTO incidents (match_id, minute, description_ar, var_review)
-           VALUES (1, 68, 'لمسة يد داخل منطقة الجزاء (حالة اختبار)', 'ofr')""")
+        """INSERT INTO incidents (match_id, minute, description_ar, var_review,
+                                 found_via, source_url)
+           VALUES (1, 68, 'لمسة يد داخل منطقة الجزاء (حالة اختبار)', 'ofr',
+                   'press', 'https://example.org/a')""")
     return cur.lastrowid
 
 

@@ -6,7 +6,7 @@ built on **real, public data only**.
 ## Status
 - [x] Database schema + tests
 - [~] Officials registry (rounds 1-5: 50 matches, 103 officials)
-- [~] Case library (part B): schema + loader done, 2 cases loaded
+- [~] Case library (part B): 11 press-found cases from 5 matches (rounds 1-5)
 - [ ] Appointment assistant (part A)
 - [ ] Expert-opinion analysis (part C)
 - [ ] "What we could do with your data" (part D, illustrative)

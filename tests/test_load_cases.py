@@ -25,7 +25,7 @@ def write(raw: Path, name: str, rows: list[list]) -> None:
 def incident(case_id=1, home="الأهلي", away="إنبي", minute=68, var="check_only",
              on_field=("foul", "إنبي", "penalty"), final=("", "", ""),
              official=("", "", ""), official_url=""):
-    return [case_id, "2026/27", 1, home, away, minute, 0, var, "وصف", "", "",
+    return [case_id, "2026/27", 1, home, away, minute, 0, var, "press", URL, "وصف", "", "",
             *on_field, *final, *official, official_url]
 
 
@@ -150,3 +150,16 @@ def test_failed_load_writes_nothing(raw):
     with pytest.raises(DataError):
         load_cases(conn, raw)
     assert conn.execute("SELECT COUNT(*) FROM incidents").fetchone()[0] == 0
+
+
+def test_minute_and_var_may_be_unknown(raw):
+    write(raw, "incidents", [incident(minute="", var="")])
+    conn, _ = build(raw)
+    assert conn.execute("SELECT minute, var_review FROM incidents").fetchone() == (None, "unknown")
+
+
+def test_found_via_is_required(raw):
+    row = incident()
+    row[8] = ""                                   # found_via
+    write(raw, "incidents", [row])
+    assert "rejected by database" in problems_of(raw)
