@@ -63,6 +63,9 @@ def problems_of(raw) -> str:
     ("مصطفى", "مصطفي"),
     ("  محمود   ناجي ", "محمود ناجي"),
     ("Mostafa OTHMAN", "mostafa othman"),
+    ("شريف عبد الله", "شريف عبدالله"),
+    ("إسلام أبو العطا", "إسلام أبوالعطا"),
+    ("أحمد عبد المنعم شعبان", "أحمد عبدالمنعم شعبان"),
 ])
 def test_normalize_spelling_noise(a, b):
     assert normalize_name(a) == normalize_name(b)
@@ -185,3 +188,11 @@ def test_bad_kickoff_time_rejected(raw):
     row[3] = "8:00 PM"
     write(raw, "crews", [row])
     assert "must be HH:MM" in problems_of(raw)
+
+
+def test_compound_join_does_not_touch_other_words():
+    # 'عبد' as a standalone first name followed by a space-separated surname
+    # is still joined (that's the intended rule), but other words are untouched
+    assert normalize_name("محمد أبو رحاب") == "محمد ابورحاب"
+    assert normalize_name("عبدالعزيز السيد") == normalize_name("عبد العزيز السيد")
+    assert normalize_name("محمد عباس") == "محمد عباس"

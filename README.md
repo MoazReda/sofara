@@ -5,7 +5,7 @@ built on **real, public data only**.
 
 ## Status
 - [x] Database schema + tests
-- [~] Officials registry (round 1 loaded: 10 matches, 60 officials)
+- [~] Officials registry (rounds 1-5: 50 matches, 102 officials; 3 items to verify)
 - [ ] Case library (part B)
 - [ ] Appointment assistant (part A)
 - [ ] Expert-opinion analysis (part C)

@@ -9,6 +9,8 @@ that decision is made by a human in official_aliases.csv.
     'ابراهيم نور الدين'
     >>> normalize_name("محمد عطيّة") == normalize_name("محمد عطيه")
     True
+    >>> normalize_name("شريف عبد الله") == normalize_name("شريف عبدالله")
+    True
 """
 from __future__ import annotations
 
@@ -36,4 +38,7 @@ def normalize_name(name: str) -> str:
     text = text.translate(_CHAR_MAP)
     text = text.casefold()                    # for Latin names: 'Osman' == 'OSMAN'
     text = re.sub(r"\s+", " ", text).strip()
+    # compound-name prefixes are written both joined and split:
+    # 'عبد الله' / 'عبدالله', 'ابو العطا' / 'ابوالعطا' -> always joined
+    text = re.sub(r"(?<!\S)(عبد|ابو) (?=\S)", r"\1", text)
     return text
