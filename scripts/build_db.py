@@ -15,6 +15,7 @@ import sqlite3
 import sys
 from pathlib import Path
 
+from load_cases import load_cases
 from load_registry import DataError, load_all
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -44,7 +45,10 @@ def build(db_path: Path, raw_dir: Path = RAW_DIR, schema_only: bool = False) -> 
     conn = connect(tmp)
     try:
         apply_schema(conn)
-        counts = {} if schema_only else load_all(conn, raw_dir)
+        counts = {}
+        if not schema_only:
+            counts.update(load_all(conn, raw_dir))
+            counts.update(load_cases(conn, raw_dir))
     finally:
         conn.close()
     tmp.replace(db_path)

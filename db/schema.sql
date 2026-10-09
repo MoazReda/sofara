@@ -237,7 +237,7 @@ CREATE TABLE incident_sanctions (
 CREATE TABLE experts (
     expert_id   INTEGER PRIMARY KEY,
     name_ar     TEXT    NOT NULL UNIQUE,
-    background  TEXT    CHECK (background IN ('ex_referee', 'journalist', 'analyst'))
+    background  TEXT    CHECK (background IN ('ex_referee', 'analyst', 'ex_player', 'journalist'))
 );
 
 -- one row = one expert's opinion on one incident from one source

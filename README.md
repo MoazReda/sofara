@@ -6,7 +6,7 @@ built on **real, public data only**.
 ## Status
 - [x] Database schema + tests
 - [~] Officials registry (rounds 1-5: 50 matches, 103 officials)
-- [ ] Case library (part B)
+- [~] Case library (part B): schema + loader done, 2 cases loaded
 - [ ] Appointment assistant (part A)
 - [ ] Expert-opinion analysis (part C)
 - [ ] "What we could do with your data" (part D, illustrative)
@@ -35,6 +35,17 @@ name must be added to `officials.csv` (new person) or `official_aliases.csv`
 (new spelling of a known person).
 
 Editing in Excel: save as **CSV UTF-8**, otherwise Arabic text breaks.
+
+### Case library files
+| file | one row = |
+|---|---|
+| `incidents.csv` | one case, with its on-field / final / official decisions side by side |
+| `incident_cards.csv` | one card to one person at one stage |
+| `experts.csv` | one expert (background: ex_referee, analyst, ex_player, journalist) |
+| `expert_opinions.csv` | one expert's opinion on one case, summarised in our own words |
+
+Leave `final_*` empty when VAR changed nothing, and `official_*` empty unless the
+committee published a ruling. Full rules: top of `scripts/load_cases.py`.
 
 ## Known data issues
 - **'محمد الشناوي'** (VAR, R2 بيراميدز × أبو قير, R5 بترول أسيوط × مودرن سبورت) is stored as
