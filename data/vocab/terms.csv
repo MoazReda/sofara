@@ -1,0 +1,67 @@
+﻿term,field,value
+لمسة يد,offence,handball
+لمسة إيد,offence,handball
+لمس يد,offence,handball
+هاند,offence,handball
+ايده,offence,handball
+استخدام اليد,offence,handball
+تسلل,offence,offside
+أوفسايد,offence,offside
+اوفسايد,offence,offside
+تمثيل,offence,simulation
+تحايل,offence,simulation
+ادعاء السقوط,offence,simulation
+فاول,offence,foul
+مخالفة,offence,foul
+عرقلة,offence,foul
+دفع,offence,foul
+شد,offence,foul
+مسك,offence,foul
+التحام,offence,foul
+سلوك عنيف,offence,violent_conduct
+اعتداء,offence,violent_conduct
+ركلة جزاء,outcome,penalty
+ضربة جزاء,outcome,penalty
+بلنتي,outcome,penalty
+بنالتي,outcome,penalty
+ضربة جزا,outcome,penalty
+هدف ملغي,outcome,goal_disallowed
+إلغاء هدف,outcome,goal_disallowed
+الغاء الهدف,outcome,goal_disallowed
+جون ملغي,outcome,goal_disallowed
+ألغى,outcome,goal_disallowed
+هدف صحيح,outcome,goal_awarded
+احتساب الهدف,outcome,goal_awarded
+ضربة حرة,outcome,free_kick
+فري كيك,outcome,free_kick
+طرد,sanction,red
+كارت أحمر,sanction,red
+بطاقة حمراء,sanction,red
+الأحمر,sanction,red
+إنذار ثاني,sanction,second_yellow
+إنذار تاني,sanction,second_yellow
+الإنذار الثاني,sanction,second_yellow
+كارت أصفر تاني,sanction,second_yellow
+إنذار,sanction,yellow
+كارت أصفر,sanction,yellow
+بطاقة صفراء,sanction,yellow
+استارز,text,
+الاستارز,text,
+لعب عنيف,reason,serious_foul_play
+تدخل خطير,reason,serious_foul_play
+منع فرصة محققة,reason,denying_goal_foul
+فرصة محققة,reason,denying_goal_foul
+DOGSO,reason,denying_goal_foul
+اعتراض,reason,dissent
+معارضة,reason,dissent
+راح الشاشة,var,ofr
+مراجعة الشاشة,var,ofr
+استدعاء الفار,var,ofr
+OFR,var,ofr
+الفار غير,var_changed,1
+الفار غير القرار,var_changed,1
+تغيير القرار,var_changed,1
+فار,var,any
+الفار,var,any
+VAR,var,any
+تقنية الفيديو,var,any

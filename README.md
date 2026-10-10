@@ -23,7 +23,7 @@ committee's own data could add.
 | Key Match Incidents | **24** cases from 10 matches, with on-field / post-VAR decisions |
 | Expert opinions | **28** from 10 experts (ex-referees, analysts, pundits) |
 | Expert commendations | **14** "best of the round" picks (rounds 1, 2, 4), each verified against the crews |
-| Tests | 90, run in CI on Windows + Ubuntu, Python 3.10 + 3.13 |
+| Tests | 112, run in CI on Windows + Ubuntu, Python 3.10 + 3.13 |
 
 The crew data was independently confirmed: every official named in Nasser
 Abbas's round reviews matches our records (match and role).
@@ -33,7 +33,7 @@ Abbas's round reviews matches our records (match and role).
 - [x] Database schema, rules enforced in SQL
 - [x] Officials registry and crews, rounds 1–5
 - [x] Expert commendations ("best of the round"), verified against the crews
-- [~] **B. Case library** — schema + loader done; 24 / ~100 cases; Arabic search next
+- [~] **B. Case library** — 24 / ~100 cases; Arabic search + video-quiz export done; video links next
 - [ ] **A. Appointment assistant** — needs match-level cards and penalties (see Known gaps)
 - [ ] **C. Expert-opinion analysis** — agreement between experts, by background
 - [ ] **D. "What your data would add"** — clearly labelled mockups + methodology
@@ -50,6 +50,21 @@ sofara-build                      # rebuild data/sofara.db from data/raw/*.csv
 sofara-report                     # coverage, bias and open issues, as Markdown
 pytest
 ```
+
+## Searching the case library
+
+Ask in everyday Arabic; the vocabulary maps it to the data
+([`data/vocab/terms.csv`](data/vocab/terms.csv)), and every result says why it matched.
+
+```bash
+sofara-search "بلنتي"                      # penalties given first, then refused claims
+sofara-search "هاند" --round 2
+sofara-search "الأهلي بلنتي"                # team names and referee names act as filters
+sofara-search "راح الشاشة" --quiz quiz.md  # video quiz: question first, answer folded away
+```
+
+The search is recall-first: it is built for an instructor who must not miss a
+case ([decision 0012](docs/decisions/0012-recall-first-search.md)).
 
 The package itself uses only the Python standard library. On MSYS2 Python,
 `ruff` can't install (no prebuilt wheel); use `pip install -e .` instead —
@@ -85,7 +100,9 @@ src/sofara/          the package
   cases.py           loads the case library
   build.py           `sofara-build`
   report.py          `sofara-report`
+  search.py          `sofara-search` + video-quiz export
 data/raw/            hand-collected CSVs (source of truth)
+data/vocab/          search vocabulary: everyday term → field → value
 docs/                decisions, data dictionary, sources
 tests/               pytest suite
 tools/pull_bundle.bat  apply a commit bundle on Windows: pull → test → build → ask → push
@@ -93,7 +110,7 @@ tools/pull_bundle.bat  apply a commit bundle on Windows: pull → test → build
 
 ## Documentation
 
-- [Decision records](docs/decisions/README.md) — the 11 decisions that shape the project, and why
+- [Decision records](docs/decisions/README.md) — the 12 decisions that shape the project, and why
 - [Data dictionary](docs/data_dictionary.md) — every table, what one row means
 - [Sources](docs/SOURCES.md) — where every piece of data comes from
 

@@ -17,3 +17,4 @@ broke. Format: Context → Decision → Consequences.
 | [0009](0009-ethics-public-data.md) | Public data is never presented as referee accuracy |
 | [0010](0010-premier-league-only.md) | Scope is the Egyptian Premier League only |
 | [0011](0011-commendations-no-ranking.md) | Expert commendations are stored, never ranked |
+| [0012](0012-recall-first-search.md) | Search is recall-first and explains every match |
