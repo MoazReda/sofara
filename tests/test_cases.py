@@ -1,15 +1,14 @@
 """Case-library loader tests: one happy path, then every rejection rule.
 Each test writes tiny CSVs into a temp folder and builds an in-memory db."""
+
 import csv
-import sys
 from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
-from build_db import apply_schema, connect  # noqa: E402
-from load_cases import CASE_FILES, load_cases  # noqa: E402
-from load_registry import FILES, DataError, load_all  # noqa: E402
+from sofara.build import apply_schema, connect
+from sofara.cases import CASE_FILES, load_cases
+from sofara.registry import FILES, DataError, load_all
 
 ALL_FILES = {**FILES, **CASE_FILES}
 URL = "https://example.org/source"
@@ -22,11 +21,36 @@ def write(raw: Path, name: str, rows: list[list]) -> None:
         w.writerows(rows)
 
 
-def incident(case_id=1, home="الأهلي", away="إنبي", minute=68, var="check_only",
-             on_field=("foul", "إنبي", "penalty"), final=("", "", ""),
-             official=("", "", ""), official_url=""):
-    return [case_id, "2026/27", 1, home, away, minute, 0, var, "press", URL, "وصف", "", "",
-            *on_field, *final, *official, official_url]
+def incident(
+    case_id=1,
+    home="الأهلي",
+    away="إنبي",
+    minute=68,
+    var="check_only",
+    on_field=("foul", "إنبي", "penalty"),
+    final=("", "", ""),
+    official=("", "", ""),
+    official_url="",
+):
+    return [
+        case_id,
+        "2026/27",
+        1,
+        home,
+        away,
+        minute,
+        0,
+        var,
+        "press",
+        URL,
+        "وصف",
+        "",
+        "",
+        *on_field,
+        *final,
+        *official,
+        official_url,
+    ]
 
 
 @pytest.fixture
@@ -35,12 +59,38 @@ def raw(tmp_path):
     write(tmp_path, "team_aliases", [["إنبي", "الشرقية إنبي", "test"]])
     write(tmp_path, "officials", [["محمود ناجي", "", "", "", ""]])
     write(tmp_path, "official_aliases", [])
-    write(tmp_path, "crews", [["2026/27", 1, "2026-08-23", "20:00", "", "الأهلي", "إنبي",
-                               "محمود ناجي", "", "", "", "", "", "", "", URL]])
+    write(
+        tmp_path,
+        "crews",
+        [
+            [
+                "2026/27",
+                1,
+                "2026-08-23",
+                "20:00",
+                "",
+                "الأهلي",
+                "إنبي",
+                "محمود ناجي",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                URL,
+            ]
+        ],
+    )
     write(tmp_path, "incidents", [incident()])
     write(tmp_path, "incident_cards", [])
     write(tmp_path, "experts", [["جهاد جريشة", "ex_referee"]])
-    write(tmp_path, "expert_opinions", [[1, "جهاد جريشة", "disagree", "ملخص", "مصدر", URL, "2026-08-24"]])
+    write(
+        tmp_path,
+        "expert_opinions",
+        [[1, "جهاد جريشة", "disagree", "ملخص", "مصدر", URL, "2026-08-24"]],
+    )
     return tmp_path
 
 
@@ -59,17 +109,26 @@ def problems_of(raw) -> str:
 
 # ---------------- happy path ----------------
 
+
 def test_happy_path(raw):
     conn, counts = build(raw)
     assert counts["incidents"] == 1 and counts["expert_opinions"] == 1
-    row = conn.execute("SELECT final_outcome, var_changed, status, referee_id "
-                       "FROM v_incident_summary").fetchone()
+    row = conn.execute(
+        "SELECT final_outcome, var_changed, status, referee_id FROM v_incident_summary"
+    ).fetchone()
     assert row == ("penalty", 0, "controversial", 1)
 
 
 def test_var_overturn_with_card(raw):
-    write(raw, "incidents", [incident(var="ofr", on_field=("none", "", "play_on"),
-                                      final=("handball", "إنبي", "penalty"))])
+    write(
+        raw,
+        "incidents",
+        [
+            incident(
+                var="ofr", on_field=("none", "", "play_on"), final=("handball", "إنبي", "penalty")
+            )
+        ],
+    )
     write(raw, "incident_cards", [[1, "final", "إنبي", "مدافع", "red", "denying_goal_handball"]])
     conn, counts = build(raw)
     assert counts["incident_sanctions"] == 1
@@ -79,14 +138,17 @@ def test_var_overturn_with_card(raw):
 def test_official_ruling_gives_verdict(raw):
     write(raw, "incidents", [incident(official=("foul", "إنبي", "penalty"), official_url=URL)])
     conn, _ = build(raw)
-    assert conn.execute("SELECT status, verdict FROM v_incident_summary").fetchone() \
-        == ("ruled", "correct")
+    assert conn.execute("SELECT status, verdict FROM v_incident_summary").fetchone() == (
+        "ruled",
+        "correct",
+    )
 
 
 # ---------------- rejections (nothing is written) ----------------
 
+
 def test_match_not_found_mentions_home_away(raw):
-    write(raw, "incidents", [incident(home="إنبي", away="الأهلي")])   # reversed
+    write(raw, "incidents", [incident(home="إنبي", away="الأهلي")])  # reversed
     assert "check home/away order" in problems_of(raw)
 
 
@@ -131,9 +193,9 @@ def test_duplicate_case_id(raw):
 
 
 def test_unknown_expert_not_guessed(raw):
-    write(raw, "expert_opinions", [[1, "جهاد جريشه ", "agree", "s", "n", URL, ""]])   # ه/ة + space
-    conn, _ = build(raw)                                                            # normalizes fine
-    write(raw, "expert_opinions", [[1, "جهاد", "agree", "s", "n", URL, ""]])        # a different name
+    write(raw, "expert_opinions", [[1, "جهاد جريشه ", "agree", "s", "n", URL, ""]])  # ه/ة + space
+    conn, _ = build(raw)  # normalizes fine
+    write(raw, "expert_opinions", [[1, "جهاد", "agree", "s", "n", URL, ""]])  # a different name
     assert "unknown expert 'جهاد'" in problems_of(raw)
 
 
@@ -160,6 +222,6 @@ def test_minute_and_var_may_be_unknown(raw):
 
 def test_found_via_is_required(raw):
     row = incident()
-    row[8] = ""                                   # found_via
+    row[8] = ""  # found_via
     write(raw, "incidents", [row])
     assert "rejected by database" in problems_of(raw)

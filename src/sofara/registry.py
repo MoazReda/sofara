@@ -19,6 +19,7 @@ Strict by design: every problem in every file is collected, reported
 together, and NOTHING is written. Unknown names are never guessed —
 add them to officials.csv or official_aliases.csv and re-run.
 """
+
 from __future__ import annotations
 
 import csv
@@ -27,12 +28,20 @@ import sqlite3
 from collections import defaultdict
 from pathlib import Path
 
-from normalize import normalize_name
+from sofara.normalize import normalize_name
 
-ROLES = ["referee", "assistant_1", "assistant_2", "fourth", "var", "avar",
-         "commissioner", "assessor"]
+ROLES = [
+    "referee",
+    "assistant_1",
+    "assistant_2",
+    "fourth",
+    "var",
+    "avar",
+    "commissioner",
+    "assessor",
+]
 DEFAULTS = {"nationality": "Egypt", "official_type": "referee"}
-DATE_RE =re.compile(r"^\d{4}-\d{2}-\d{2}$")
+DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 SEASON_RE = re.compile(r"^\d{4}/\d{2}$")
 TIME_RE = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
 
@@ -41,8 +50,17 @@ FILES = {
     "team_aliases": ["alias", "team_name_ar", "source"],
     "officials": ["name_ar", "name_en", "nationality", "region", "official_type"],
     "official_aliases": ["alias", "official_name_ar", "source"],
-    "crews": ["season", "round", "match_date", "kickoff_time", "stadium",
-              "home_team", "away_team", *ROLES, "source_url"],
+    "crews": [
+        "season",
+        "round",
+        "match_date",
+        "kickoff_time",
+        "stadium",
+        "home_team",
+        "away_team",
+        *ROLES,
+        "source_url",
+    ],
 }
 
 
@@ -58,6 +76,7 @@ class DataError(Exception):
 # reading
 # ---------------------------------------------------------------------------
 
+
 def read_csv(path: Path, expected: list[str], problems: list[str]) -> list[dict]:
     """Read a CSV into dicts (stripped values, '' -> None). Missing file = empty."""
     if not path.exists():
@@ -70,9 +89,8 @@ def read_csv(path: Path, expected: list[str], problems: list[str]) -> list[dict]
             problems.append(f"{path.name}: header is {header}, expected {expected}")
             return []
         rows = []
-        for line_no, raw in enumerate(reader, start=2):   # line 1 is the header
-            row = {k: (v.strip() or None) if isinstance(v, str) else None
-                   for k, v in raw.items()}
+        for line_no, raw in enumerate(reader, start=2):  # line 1 is the header
+            row = {k: (v.strip() or None) if isinstance(v, str) else None for k, v in raw.items()}
             row["_line"] = f"{path.name}:{line_no}"
             rows.append(row)
         return rows
@@ -82,6 +100,7 @@ def read_csv(path: Path, expected: list[str], problems: list[str]) -> list[dict]
 # lookups: normalized name -> id
 # ---------------------------------------------------------------------------
 
+
 def _register(lookup: dict, name: str, entity_id: int, where: str, problems: list[str]) -> None:
     key = normalize_name(name)
     if key in lookup and lookup[key] != entity_id:
@@ -89,8 +108,9 @@ def _register(lookup: dict, name: str, entity_id: int, where: str, problems: lis
     lookup[key] = entity_id
 
 
-def _load_entities(conn, rows, aliases, table, id_col, alias_table, alias_fk,
-                   alias_name_col, columns, problems):
+def _load_entities(
+    conn, rows, aliases, table, id_col, alias_table, alias_fk, alias_name_col, columns, problems
+):
     """Insert canonical entities + their aliases; return the lookup dict."""
     lookup: dict[str, int] = {}
     for i, row in enumerate(rows, start=1):
@@ -115,8 +135,10 @@ def _load_entities(conn, rows, aliases, table, id_col, alias_table, alias_fk,
     for row in aliases:
         target = lookup.get(normalize_name(row[alias_name_col]))
         if target is None:
-            problems.append(f"{row['_line']}: alias '{row['alias']}' points to "
-                            f"unknown name '{row[alias_name_col]}'")
+            problems.append(
+                f"{row['_line']}: alias '{row['alias']}' points to "
+                f"unknown name '{row[alias_name_col]}'"
+            )
             continue
         try:
             conn.execute(
@@ -134,11 +156,12 @@ def _load_entities(conn, rows, aliases, table, id_col, alias_table, alias_fk,
 # crews
 # ---------------------------------------------------------------------------
 
+
 def _load_crews(conn, rows, team_lookup, official_lookup, problems):
     unknown_teams: dict[str, list[str]] = defaultdict(list)
     unknown_officials: dict[str, list[str]] = defaultdict(list)
-    busy: dict[tuple, str] = {}          # (official_id, date) -> where
-    team_rounds: dict[tuple, str] = {}   # (season, round, team_id) -> where
+    busy: dict[tuple, str] = {}  # (official_id, date) -> where
+    team_rounds: dict[tuple, str] = {}  # (season, round, team_id) -> where
     parsed = []
 
     for row in rows:
@@ -173,7 +196,7 @@ def _load_crews(conn, rows, team_lookup, official_lookup, problems):
         for role in ROLES:
             name = row[role]
             if name is None:
-                continue                      # role not announced
+                continue  # role not announced
             oid = official_lookup.get(normalize_name(name))
             if oid is None:
                 unknown_officials[name].append(f"{where} ({role})")
@@ -194,24 +217,30 @@ def _load_crews(conn, rows, team_lookup, official_lookup, problems):
         for oid in crew.values():
             key = (oid, row["match_date"])
             if key in busy:
-                problems.append(f"{where}: an official is already assigned on "
-                                f"{row['match_date']} at {busy[key]}")
+                problems.append(
+                    f"{where}: an official is already assigned on "
+                    f"{row['match_date']} at {busy[key]}"
+                )
             busy[key] = where
         for tid in teams.values():
             key = (row["season"], int(row["round"]), tid)
             if key in team_rounds:
-                problems.append(f"{where}: a team plays twice in round {row['round']} "
-                                f"(also {team_rounds[key]})")
+                problems.append(
+                    f"{where}: a team plays twice in round {row['round']} (also {team_rounds[key]})"
+                )
             team_rounds[key] = where
 
         parsed.append((row, teams, crew))
 
     for name, places in sorted(unknown_teams.items()):
-        problems.append(f"Unknown team '{name}' at {', '.join(places)} "
-                        f"-> add to teams.csv or team_aliases.csv")
+        problems.append(
+            f"Unknown team '{name}' at {', '.join(places)} -> add to teams.csv or team_aliases.csv"
+        )
     for name, places in sorted(unknown_officials.items()):
-        problems.append(f"Unknown official '{name}' at {', '.join(places)} "
-                        f"-> add to officials.csv or official_aliases.csv")
+        problems.append(
+            f"Unknown official '{name}' at {', '.join(places)} "
+            f"-> add to officials.csv or official_aliases.csv"
+        )
 
     for row, teams, crew in parsed:
         try:
@@ -219,8 +248,16 @@ def _load_crews(conn, rows, team_lookup, official_lookup, problems):
                 """INSERT INTO matches (season, round, match_date, kickoff_time, stadium,
                        home_team_id, away_team_id, source)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                (row["season"], int(row["round"]), row["match_date"], row["kickoff_time"],
-                 row["stadium"], teams["home_team"], teams["away_team"], row["source_url"]),
+                (
+                    row["season"],
+                    int(row["round"]),
+                    row["match_date"],
+                    row["kickoff_time"],
+                    row["stadium"],
+                    teams["home_team"],
+                    teams["away_team"],
+                    row["source_url"],
+                ),
             )
         except sqlite3.IntegrityError as e:
             problems.append(f"{row['_line']}: {e}")
@@ -235,22 +272,39 @@ def _load_crews(conn, rows, team_lookup, official_lookup, problems):
 # entry point
 # ---------------------------------------------------------------------------
 
+
 def load_all(conn: sqlite3.Connection, raw_dir: Path) -> dict[str, int]:
     """Load every raw CSV in one transaction. Raises DataError, writing nothing,
     if any problem is found. Returns row counts per table on success."""
     problems: list[str] = []
-    data = {name: read_csv(raw_dir / f"{name}.csv", cols, problems)
-            for name, cols in FILES.items()}
+    data = {name: read_csv(raw_dir / f"{name}.csv", cols, problems) for name, cols in FILES.items()}
 
     conn.execute("BEGIN")
     try:
         team_lookup = _load_entities(
-            conn, data["teams"], data["team_aliases"], "teams", "team_id",
-            "team_aliases", "team_id", "team_name_ar", ["name_ar", "name_en"], problems)
+            conn,
+            data["teams"],
+            data["team_aliases"],
+            "teams",
+            "team_id",
+            "team_aliases",
+            "team_id",
+            "team_name_ar",
+            ["name_ar", "name_en"],
+            problems,
+        )
         official_lookup = _load_entities(
-            conn, data["officials"], data["official_aliases"], "officials", "official_id",
-            "official_aliases", "official_id", "official_name_ar",
-            ["name_ar", "name_en", "nationality", "region", "official_type"], problems)
+            conn,
+            data["officials"],
+            data["official_aliases"],
+            "officials",
+            "official_id",
+            "official_aliases",
+            "official_id",
+            "official_name_ar",
+            ["name_ar", "name_en", "nationality", "region", "official_type"],
+            problems,
+        )
         _load_crews(conn, data["crews"], team_lookup, official_lookup, problems)
         if problems:
             raise DataError(problems)
@@ -259,5 +313,7 @@ def load_all(conn: sqlite3.Connection, raw_dir: Path) -> dict[str, int]:
         raise
     conn.commit()
 
-    return {t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
-            for t in ("teams", "officials", "matches", "match_officials")}
+    return {
+        t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
+        for t in ("teams", "officials", "matches", "match_officials")
+    }

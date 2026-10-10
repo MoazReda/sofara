@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sofara"
+version = "0.1.0"
+description = "Egyptian refereeing analytics on real, public data"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Moaz Reda" }]
+dependencies = []            # the core uses the standard library only
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[project.scripts]
+sofara-build = "sofara.build:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+sofara = ["sql/*.sql"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "src"]   # src: runs the doctest examples too
+pythonpath = ["src"]         # tests run even without `pip install -e .`
+addopts = "-q --doctest-modules --doctest-glob=''"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "SIM"]

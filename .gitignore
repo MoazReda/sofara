@@ -5,3 +5,7 @@ __pycache__/
 .ipynb_checkpoints/
 data/sources/
 *.bundle
+*.egg-info/
+.ruff_cache/
+build/
+dist/

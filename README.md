@@ -11,11 +11,24 @@ built on **real, public data only**.
 - [ ] Expert-opinion analysis (part C)
 - [ ] "What we could do with your data" (part D, illustrative)
 
-## Quick start (Colab / Kaggle / local)
+## Quick start (Windows / Colab / Kaggle)
 ```bash
-pip install pytest
-python scripts/build_db.py          # creates data/sofara.db
-python -m pytest -q                 # runs schema tests
+pip install -e ".[dev]"     # once: installs the package + pytest + ruff
+sofara-build                # rebuilds data/sofara.db from data/raw/*.csv
+pytest                      # schema, loaders and doctests
+ruff check . && ruff format --check .
+```
+
+## Repository layout
+```
+src/sofara/          the package
+  sql/schema.sql     tables, triggers, views (the rules live here)
+  normalize.py       Arabic name normalization
+  registry.py        loads teams, officials, crews
+  cases.py           loads the case library
+  build.py           `sofara-build`: schema + all loaders
+data/raw/            hand-collected CSVs — the source of truth
+tests/               pytest suite
 ```
 
 ## Data workflow
@@ -45,7 +58,7 @@ Editing in Excel: save as **CSV UTF-8**, otherwise Arabic text breaks.
 | `expert_opinions.csv` | one expert's opinion on one case, summarised in our own words |
 
 Leave `final_*` empty when VAR changed nothing, and `official_*` empty unless the
-committee published a ruling. Full rules: top of `scripts/load_cases.py`.
+committee published a ruling. Full rules: top of `src/sofara/cases.py`.
 
 ## Known data issues
 - **'محمد الشناوي'** (VAR, R2 بيراميدز × أبو قير, R5 بترول أسيوط × مودرن سبورت) is stored as
@@ -62,7 +75,7 @@ teams ──< matches >── match_officials >── officials ──< official
              └──< incidents ──< incident_decisions ──< incident_sanctions
                       └──< expert_opinions >── experts
 ```
-Full definitions with comments: [`db/schema.sql`](db/schema.sql).
+Full definitions with comments: [`src/sofara/sql/schema.sql`](src/sofara/sql/schema.sql).
 Field layout follows the official EFA referee match report.
 
 Key rules enforced by the database itself:

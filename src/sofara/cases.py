@@ -1,6 +1,6 @@
 """Load the case library (part ب) from data/raw/ into the database.
 
-Must run AFTER load_registry.load_all (cases point at matches and teams).
+Must run AFTER sofara.registry.load_all (cases point at matches and teams).
 
 CSV files (UTF-8; Excel: "CSV UTF-8"):
 
@@ -37,29 +37,47 @@ Same rules as the registry loader: every problem in every file is reported
 together, nothing is written unless everything is valid, names are never
 guessed.
 """
+
 from __future__ import annotations
 
 import sqlite3
 from pathlib import Path
 
-from load_registry import DATE_RE, SEASON_RE, DataError, read_csv
-from normalize import normalize_name
+from sofara.normalize import normalize_name
+from sofara.registry import DATE_RE, SEASON_RE, DataError, read_csv
 
 STAGES = ("on_field", "final", "official")
 DECISION_FIELDS = ("offence", "offending_team", "outcome")
 
 CASE_FILES = {
     "incidents": [
-        "case_id", "season", "round", "home_team", "away_team", "minute",
-        "added_minute", "var_review", "found_via", "source_url", "description_ar",
-        "video_url", "video_start_sec",
+        "case_id",
+        "season",
+        "round",
+        "home_team",
+        "away_team",
+        "minute",
+        "added_minute",
+        "var_review",
+        "found_via",
+        "source_url",
+        "description_ar",
+        "video_url",
+        "video_start_sec",
         *[f"{s}_{f}" for s in STAGES for f in DECISION_FIELDS],
         "official_source_url",
     ],
     "incident_cards": ["case_id", "stage", "team", "person_name", "sanction", "reason"],
     "experts": ["name_ar", "background"],
-    "expert_opinions": ["case_id", "expert", "stance", "summary_ar", "source_name",
-                        "source_url", "published_date"],
+    "expert_opinions": [
+        "case_id",
+        "expert",
+        "stance",
+        "summary_ar",
+        "source_name",
+        "source_url",
+        "published_date",
+    ],
 }
 
 
@@ -74,7 +92,9 @@ def _int(value, where, field, problems, default=None):
 
 def _team_lookup(conn) -> dict[str, int]:
     lookup = {normalize_name(n): i for n, i in conn.execute("SELECT name_ar, team_id FROM teams")}
-    lookup.update({normalize_name(a): i for a, i in conn.execute("SELECT alias, team_id FROM team_aliases")})
+    lookup.update(
+        {normalize_name(a): i for a, i in conn.execute("SELECT alias, team_id FROM team_aliases")}
+    )
     return lookup
 
 
@@ -102,21 +122,27 @@ def _load_incidents(conn, rows, teams, problems) -> set[int]:
         # find the match: season + round + both teams
         ok = True
         if not row["season"] or not SEASON_RE.match(row["season"]):
-            problems.append(f"{where}: season '{row['season']}' must look like 2026/27"); ok = False
+            problems.append(f"{where}: season '{row['season']}' must look like 2026/27")
+            ok = False
         rnd = _int(row["round"], where, "round", problems)
         home = teams.get(normalize_name(row["home_team"] or ""))
         away = teams.get(normalize_name(row["away_team"] or ""))
         for name, tid in ((row["home_team"], home), (row["away_team"], away)):
             if tid is None:
-                problems.append(f"{where}: unknown team '{name}'"); ok = False
+                problems.append(f"{where}: unknown team '{name}'")
+                ok = False
         if not ok or rnd is None:
             continue
         match = conn.execute(
-            "SELECT match_id FROM matches WHERE season=? AND round=? AND home_team_id=? AND away_team_id=?",
-            (row["season"], rnd, home, away)).fetchone()
+            "SELECT match_id FROM matches"
+            " WHERE season=? AND round=? AND home_team_id=? AND away_team_id=?",
+            (row["season"], rnd, home, away),
+        ).fetchone()
         if match is None:
-            problems.append(f"{where}: no match {row['home_team']} × {row['away_team']} "
-                            f"in round {rnd} of {row['season']} (check home/away order)")
+            problems.append(
+                f"{where}: no match {row['home_team']} × {row['away_team']} "
+                f"in round {rnd} of {row['season']} (check home/away order)"
+            )
             continue
 
         minute = _int(row["minute"], where, "minute", problems)
@@ -124,14 +150,27 @@ def _load_incidents(conn, rows, teams, problems) -> set[int]:
         start = _int(row["video_start_sec"], where, "video_start_sec", problems)
         if (row["minute"] and minute is None) or added is None:
             continue
-        if not _insert(conn,
-                       """INSERT INTO incidents (incident_id, match_id, minute, added_minute,
+        if not _insert(
+            conn,
+            """INSERT INTO incidents (incident_id, match_id, minute, added_minute,
                               description_ar, var_review, found_via, source_url,
                               video_url, video_start_sec)
                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                       (case_id, match[0], minute, added, row["description_ar"],
-                        row["var_review"] or "unknown", row["found_via"], row["source_url"],
-                        row["video_url"], start), where, problems):
+            (
+                case_id,
+                match[0],
+                minute,
+                added,
+                row["description_ar"],
+                row["var_review"] or "unknown",
+                row["found_via"],
+                row["source_url"],
+                row["video_url"],
+                start,
+            ),
+            where,
+            problems,
+        ):
             continue
 
         # one decision row per filled stage
@@ -151,12 +190,21 @@ def _load_incidents(conn, rows, teams, problems) -> set[int]:
                 if team_id is None:
                     problems.append(f"{where}: {stage}_offending_team: unknown team '{team_name}'")
                     continue
-            _insert(conn,
-                    """INSERT INTO incident_decisions (incident_id, stage, offence,
+            _insert(
+                conn,
+                """INSERT INTO incident_decisions (incident_id, stage, offence,
                            offending_team_id, outcome, source_url) VALUES (?, ?, ?, ?, ?, ?)""",
-                    (case_id, stage, offence, team_id, outcome,
-                     row["official_source_url"] if stage == "official" else None),
-                    f"{where} ({stage})", problems)
+                (
+                    case_id,
+                    stage,
+                    offence,
+                    team_id,
+                    outcome,
+                    row["official_source_url"] if stage == "official" else None,
+                ),
+                f"{where} ({stage})",
+                problems,
+            )
         loaded.add(case_id)
     return loaded
 
@@ -168,22 +216,30 @@ def _load_cards(conn, rows, teams, cases, problems) -> None:
         if case_id is None:
             continue
         if case_id not in cases:
-            problems.append(f"{where}: case_id {case_id} is not in incidents.csv"); continue
+            problems.append(f"{where}: case_id {case_id} is not in incidents.csv")
+            continue
         team_id = teams.get(normalize_name(row["team"] or ""))
         if team_id is None:
-            problems.append(f"{where}: unknown team '{row['team']}'"); continue
+            problems.append(f"{where}: unknown team '{row['team']}'")
+            continue
         has_stage = conn.execute(
             "SELECT 1 FROM incident_decisions WHERE incident_id=? AND stage=?",
-            (case_id, row["stage"])).fetchone()
+            (case_id, row["stage"]),
+        ).fetchone()
         if not has_stage:
-            problems.append(f"{where}: case {case_id} has no '{row['stage']}' decision "
-                            f"in incidents.csv, so it can't have a card at that stage")
+            problems.append(
+                f"{where}: case {case_id} has no '{row['stage']}' decision "
+                f"in incidents.csv, so it can't have a card at that stage"
+            )
             continue
-        _insert(conn,
-                """INSERT INTO incident_sanctions (incident_id, stage, team_id, person_name,
+        _insert(
+            conn,
+            """INSERT INTO incident_sanctions (incident_id, stage, team_id, person_name,
                        sanction, reason) VALUES (?, ?, ?, ?, ?, ?)""",
-                (case_id, row["stage"], team_id, row["person_name"], row["sanction"], row["reason"]),
-                where, problems)
+            (case_id, row["stage"], team_id, row["person_name"], row["sanction"], row["reason"]),
+            where,
+            problems,
+        )
 
 
 def _load_experts(conn, rows, problems) -> dict[str, int]:
@@ -191,11 +247,18 @@ def _load_experts(conn, rows, problems) -> dict[str, int]:
     for i, row in enumerate(rows, start=1):
         key = normalize_name(row["name_ar"] or "")
         if not key:
-            problems.append(f"{row['_line']}: name_ar is empty"); continue
+            problems.append(f"{row['_line']}: name_ar is empty")
+            continue
         if key in lookup:
-            problems.append(f"{row['_line']}: expert '{row['name_ar']}' listed twice"); continue
-        if _insert(conn, "INSERT INTO experts (expert_id, name_ar, background) VALUES (?, ?, ?)",
-                   (i, row["name_ar"], row["background"]), row["_line"], problems):
+            problems.append(f"{row['_line']}: expert '{row['name_ar']}' listed twice")
+            continue
+        if _insert(
+            conn,
+            "INSERT INTO experts (expert_id, name_ar, background) VALUES (?, ?, ?)",
+            (i, row["name_ar"], row["background"]),
+            row["_line"],
+            problems,
+        ):
             lookup[key] = i
     return lookup
 
@@ -207,24 +270,39 @@ def _load_opinions(conn, rows, experts, cases, problems) -> None:
         if case_id is None:
             continue
         if case_id not in cases:
-            problems.append(f"{where}: case_id {case_id} is not in incidents.csv"); continue
+            problems.append(f"{where}: case_id {case_id} is not in incidents.csv")
+            continue
         expert_id = experts.get(normalize_name(row["expert"] or ""))
         if expert_id is None:
-            problems.append(f"{where}: unknown expert '{row['expert']}' -> add to experts.csv"); continue
+            problems.append(f"{where}: unknown expert '{row['expert']}' -> add to experts.csv")
+            continue
         if row["published_date"] and not DATE_RE.match(row["published_date"]):
-            problems.append(f"{where}: published_date must be YYYY-MM-DD"); continue
-        _insert(conn,
-                """INSERT INTO expert_opinions (incident_id, expert_id, stance, summary_ar,
+            problems.append(f"{where}: published_date must be YYYY-MM-DD")
+            continue
+        _insert(
+            conn,
+            """INSERT INTO expert_opinions (incident_id, expert_id, stance, summary_ar,
                        source_name, source_url, published_date) VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                (case_id, expert_id, row["stance"], row["summary_ar"], row["source_name"],
-                 row["source_url"], row["published_date"]), where, problems)
+            (
+                case_id,
+                expert_id,
+                row["stance"],
+                row["summary_ar"],
+                row["source_name"],
+                row["source_url"],
+                row["published_date"],
+            ),
+            where,
+            problems,
+        )
 
 
 def load_cases(conn: sqlite3.Connection, raw_dir: Path) -> dict[str, int]:
     """Load all case-library CSVs in one transaction (all or nothing)."""
     problems: list[str] = []
-    data = {name: read_csv(raw_dir / f"{name}.csv", cols, problems)
-            for name, cols in CASE_FILES.items()}
+    data = {
+        name: read_csv(raw_dir / f"{name}.csv", cols, problems) for name, cols in CASE_FILES.items()
+    }
     conn.execute("BEGIN")
     try:
         teams = _team_lookup(conn)
@@ -240,6 +318,13 @@ def load_cases(conn: sqlite3.Connection, raw_dir: Path) -> dict[str, int]:
         conn.rollback()
         raise
     conn.commit()
-    return {t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
-            for t in ("incidents", "incident_decisions", "incident_sanctions",
-                      "experts", "expert_opinions")}
+    return {
+        t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
+        for t in (
+            "incidents",
+            "incident_decisions",
+            "incident_sanctions",
+            "experts",
+            "expert_opinions",
+        )
+    }

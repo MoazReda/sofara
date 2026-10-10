@@ -1,15 +1,14 @@
 """Loader tests: happy path, alias resolution, and every rejection rule.
 Each test writes tiny CSVs into a temp folder and builds an in-memory db."""
+
 import csv
-import sys
 from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
-from build_db import apply_schema, connect  # noqa: E402
-from load_registry import FILES, DataError, load_all  # noqa: E402
-from normalize import normalize_name  # noqa: E402
+from sofara.build import apply_schema, connect
+from sofara.normalize import normalize_name
+from sofara.registry import FILES, DataError, load_all
 
 URL = "https://example.org/round-1-crews"
 
@@ -21,24 +20,59 @@ def write(raw: Path, name: str, rows: list[list]) -> None:
         w.writerows(rows)
 
 
-def crew_row(home="الأهلي", away="إنبي", date="2026-08-23", rnd=1,
-             referee="محمود احمد ناجي", ar1="سمير جمال سعد محمد", var=None):
+def crew_row(
+    home="الأهلي",
+    away="إنبي",
+    date="2026-08-23",
+    rnd=1,
+    referee="محمود احمد ناجي",
+    ar1="سمير جمال سعد محمد",
+    var=None,
+):
     # season, round, date, time, stadium, home, away,
     # ref, ar1, ar2, 4th, var, avar, commissioner, assessor, url
-    return ["2026/27", rnd, date, "20:00", "", home, away,
-            referee, ar1, "", "", var or "", "", "", "", URL]
+    return [
+        "2026/27",
+        rnd,
+        date,
+        "20:00",
+        "",
+        home,
+        away,
+        referee,
+        ar1,
+        "",
+        "",
+        var or "",
+        "",
+        "",
+        "",
+        URL,
+    ]
 
 
 @pytest.fixture
 def raw(tmp_path):
-    write(tmp_path, "teams", [["الأهلي", "Al Ahly"], ["إنبي", "ENPPI"],
-                              ["الزمالك", "Zamalek"], ["بيراميدز", "Pyramids"]])
+    write(
+        tmp_path,
+        "teams",
+        [
+            ["الأهلي", "Al Ahly"],
+            ["إنبي", "ENPPI"],
+            ["الزمالك", "Zamalek"],
+            ["بيراميدز", "Pyramids"],
+        ],
+    )
     write(tmp_path, "team_aliases", [["انبى", "إنبي", "press"]])
-    write(tmp_path, "officials", [
-        ["محمود احمد ناجي", "", "", "الغربية", ""],
-        ["سمير جمال سعد محمد", "", "", "القاهرة", ""],
-        ["مصطفى عثمان", "Mostafa Othman", "", "", ""],
-    ])
+    write(
+        tmp_path,
+        "officials",
+        [
+            ["محمود احمد ناجي", "", "", "الغربية", ""],
+            ["سمير جمال سعد محمد", "", "", "القاهرة", ""],
+            ["مصطفى عثمان", "Mostafa Othman", "", "", ""],
+        ],
+    )
     write(tmp_path, "official_aliases", [["محمود ناجي", "محمود احمد ناجي", "press"]])
     return tmp_path
 
@@ -57,16 +91,20 @@ def problems_of(raw) -> str:
 
 # ---------------- normalization ----------------
 
-@pytest.mark.parametrize("a,b", [
-    ("إبراهيم نور الدين", "ابراهيم نور الدين"),
-    ("محمد عطيّة", "محمد عطيه"),
-    ("مصطفى", "مصطفي"),
-    ("  محمود   ناجي ", "محمود ناجي"),
-    ("Mostafa OTHMAN", "mostafa othman"),
-    ("شريف عبد الله", "شريف عبدالله"),
-    ("إسلام أبو العطا", "إسلام أبوالعطا"),
-    ("أحمد عبد المنعم شعبان", "أحمد عبدالمنعم شعبان"),
-])
+
+@pytest.mark.parametrize(
+    "a,b",
+    [
+        ("إبراهيم نور الدين", "ابراهيم نور الدين"),
+        ("محمد عطيّة", "محمد عطيه"),
+        ("مصطفى", "مصطفي"),
+        ("  محمود   ناجي ", "محمود ناجي"),
+        ("Mostafa OTHMAN", "mostafa othman"),
+        ("شريف عبد الله", "شريف عبدالله"),
+        ("إسلام أبو العطا", "إسلام أبوالعطا"),
+        ("أحمد عبد المنعم شعبان", "أحمد عبدالمنعم شعبان"),
+    ],
+)
 def test_normalize_spelling_noise(a, b):
     assert normalize_name(a) == normalize_name(b)
 
@@ -76,6 +114,7 @@ def test_normalize_does_not_merge_different_names():
 
 
 # ---------------- happy path ----------------
+
 
 def test_happy_path_counts(raw):
     write(raw, "crews", [crew_row()])
@@ -102,14 +141,17 @@ def test_alias_and_spelling_resolve_to_same_people(raw):
 def test_english_name_resolves(raw):
     write(raw, "crews", [crew_row(var="Mostafa Othman")])
     conn, _ = build(raw)
-    assert conn.execute(
-        "SELECT official_id FROM match_officials WHERE role = 'var'").fetchone()[0] == 3
+    assert (
+        conn.execute("SELECT official_id FROM match_officials WHERE role = 'var'").fetchone()[0]
+        == 3
+    )
 
 
 # ---------------- rejections (and nothing gets written) ----------------
 
+
 def test_unknown_official_is_reported_not_guessed(raw):
-    write(raw, "crews", [crew_row(var="Mostafa Osman")])   # close, but not registered
+    write(raw, "crews", [crew_row(var="Mostafa Osman")])  # close, but not registered
     msg = problems_of(raw)
     assert "Unknown official 'Mostafa Osman'" in msg
     assert "crews.csv:2 (var)" in msg
@@ -124,8 +166,11 @@ def test_all_problems_reported_together(raw):
 
 
 def test_failed_load_writes_nothing(raw):
-    write(raw, "crews", [crew_row(), crew_row(home="الزمالك", away="بيراميدز",
-                                              referee="حكم مجهول", ar1="")])
+    write(
+        raw,
+        "crews",
+        [crew_row(), crew_row(home="الزمالك", away="بيراميدز", referee="حكم مجهول", ar1="")],
+    )
     conn = connect(":memory:")
     apply_schema(conn)
     with pytest.raises(DataError):
@@ -140,18 +185,26 @@ def test_same_person_two_roles_rejected(raw):
 
 
 def test_official_in_two_matches_same_day_rejected(raw):
-    write(raw, "crews", [
-        crew_row(),
-        crew_row(home="الزمالك", away="بيراميدز", ar1="مصطفى عثمان"),
-    ])
+    write(
+        raw,
+        "crews",
+        [
+            crew_row(),
+            crew_row(home="الزمالك", away="بيراميدز", ar1="مصطفى عثمان"),
+        ],
+    )
     assert "already assigned on 2026-08-23" in problems_of(raw)
 
 
 def test_team_twice_in_same_round_rejected(raw):
-    write(raw, "crews", [
-        crew_row(),
-        crew_row(away="الزمالك", date="2026-08-25"),
-    ])
+    write(
+        raw,
+        "crews",
+        [
+            crew_row(),
+            crew_row(away="الزمالك", date="2026-08-25"),
+        ],
+    )
     assert "plays twice in round 1" in problems_of(raw)
 
 
@@ -161,8 +214,7 @@ def test_missing_referee_rejected(raw):
 
 
 def test_wrong_header_rejected(raw):
-    (raw / "crews.csv").write_text("season,round,date\n2026/27,1,2026-08-23\n",
-                                   encoding="utf-8")
+    (raw / "crews.csv").write_text("season,round,date\n2026/27,1,2026-08-23\n", encoding="utf-8")
     assert "crews.csv: header is" in problems_of(raw)
 
 

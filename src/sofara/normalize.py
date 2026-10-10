@@ -12,6 +12,7 @@ that decision is made by a human in official_aliases.csv.
     >>> normalize_name("شريف عبد الله") == normalize_name("شريف عبدالله")
     True
 """
+
 from __future__ import annotations
 
 import re
@@ -20,13 +21,18 @@ import unicodedata
 # Arabic diacritics (tashkeel) + Quranic marks + tatweel
 _DIACRITICS = re.compile(r"[ؐ-ًؚ-ٰٟۖ-ۭـ]")
 
-_CHAR_MAP = str.maketrans({
-    "أ": "ا", "إ": "ا", "آ": "ا", "ٱ": "ا",   # alef variants -> bare alef
-    "ة": "ه",                                 # ta marbuta -> ha
-    "ى": "ي",                                 # alef maqsura -> ya
-    "ؤ": "و",
-    "ئ": "ي",
-})
+_CHAR_MAP = str.maketrans(
+    {
+        "أ": "ا",
+        "إ": "ا",
+        "آ": "ا",
+        "ٱ": "ا",  # alef variants -> bare alef
+        "ة": "ه",  # ta marbuta -> ha
+        "ى": "ي",  # alef maqsura -> ya
+        "ؤ": "و",
+        "ئ": "ي",
+    }
+)
 
 
 def normalize_name(name: str) -> str:
@@ -36,7 +42,7 @@ def normalize_name(name: str) -> str:
     text = unicodedata.normalize("NFKC", str(name))
     text = _DIACRITICS.sub("", text)
     text = text.translate(_CHAR_MAP)
-    text = text.casefold()                    # for Latin names: 'Osman' == 'OSMAN'
+    text = text.casefold()  # for Latin names: 'Osman' == 'OSMAN'
     text = re.sub(r"\s+", " ", text).strip()
     # compound-name prefixes are written both joined and split:
     # 'عبد الله' / 'عبدالله', 'ابو العطا' / 'ابوالعطا' -> always joined
