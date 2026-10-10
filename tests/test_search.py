@@ -45,18 +45,21 @@ GOLD = {
     # query: cases that must be found
     "بلنتي": {1, 2, 3, 7, 8, 9, 11, 13, 14, 16, 17, 19, 20, 21, 22},
     "ركلة جزاء": {1, 2, 3, 7, 8, 9, 11, 13, 14, 16, 17, 19, 20, 21, 22},
-    "لمسة يد": {2, 3, 12},
-    "هاند": {2, 3, 12},
-    "تسلل": {5, 10},
+    "لمسة يد": {2, 3, 12, 25, 32},
+    "هاند": {2, 3, 12, 25, 32},
+    "تسلل": {5, 10, 26},
     "هدف ملغي": {5, 10, 18},
-    "طرد": {6, 15, 23, 24},
+    "طرد": {6, 15, 23, 24, 11, 29, 31},
     "راح الشاشة": {15, 16},
-    "الفار غير القرار": {15},
+    "الفار غير القرار": {15, 26, 27},
     "استارز": {24},
     "حارس": {15, 22},
     "الأهلي بلنتي": {1, 2, 3, 7, 8, 9, 13},
     "إعادة البلنتي": {22},
     "تقدم الحارس": {22},
+    "ركنية": {27},
+    "إنذار": {11, 23, 29, 31},
+    "المعايير": {30},
 }
 
 
@@ -81,6 +84,17 @@ def test_text_only_term_does_not_match_fields(conn, vocab):
     assert 15 not in ids(conn, vocab, "استارز")
 
 
+def test_supported_is_not_his_hand(conn, vocab):
+    # "وأيّده الـVAR" (VAR supported him) normalizes like "إيده" (his hand):
+    # a shirt-pull case must not appear in a handball search
+    assert 28 not in ids(conn, vocab, "لمسة يد")
+
+
+def test_arm_in_a_foul_is_not_handball(conn, vocab):
+    # case 23: Fattouh used his arm in a challenge — a foul, not a handball
+    assert 23 not in ids(conn, vocab, "هاند")
+
+
 def test_longest_team_name_wins(conn, vocab):
     q = parse(conn, "البنك الأهلي بلنتي", vocab)
     names = {
@@ -93,7 +107,7 @@ def test_longest_team_name_wins(conn, vocab):
 
 
 def test_referee_name_filters(conn, vocab):
-    assert set(ids(conn, vocab, "محمود ناجي")) == {1, 2, 13}
+    assert set(ids(conn, vocab, "محمود ناجي")) == {1, 2, 13, 30, 31, 32, 33}
 
 
 def test_different_kinds_are_anded(conn, vocab):

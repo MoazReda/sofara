@@ -99,6 +99,8 @@ AR = {  # Arabic labels for codes shown to the user
     "goal_awarded": "احتساب الهدف",
     "goal_disallowed": "إلغاء الهدف",
     "penalty_retaken": "إعادة ركلة الجزاء",
+    "corner": "ركلة ركنية",
+    "goal_kick": "ضربة مرمى",
     "yellow": "إنذار",
     "second_yellow": "إنذار ثانٍ (طرد)",
     "red": "طرد",

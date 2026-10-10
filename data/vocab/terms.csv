@@ -3,8 +3,7 @@
 لمسة إيد,offence,handball
 لمس يد,offence,handball
 هاند,offence,handball
-ايده,offence,handball
-استخدام اليد,offence,handball
+استخدام اليد,text,
 تسلل,offence,offside
 أوفسايد,offence,offside
 اوفسايد,offence,offside
@@ -70,3 +69,16 @@ VAR,var,any
 إعادة الركلة,outcome,penalty_retaken
 تقدم الحارس,offence,goalkeeper_encroachment
 خط المرمى,offence,goalkeeper_encroachment
+ركلة ركنية,outcome,corner
+ركنية,outcome,corner
+كورنر,outcome,corner
+ضربة مرمى,outcome,goal_kick
+ركلة مرمى,outcome,goal_kick
+حكم الراية,text,
+الراية,text,
+معايير,text,
+تثبيت المعايير,text,
+لمست الكرة يد,offence,handball
+لمس الكرة باليد,offence,handball
+لمست يد,offence,handball
+لمسة اليد,offence,handball

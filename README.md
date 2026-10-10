@@ -20,10 +20,10 @@ committee's own data could add.
 |---|---|
 | Matches | **50** — every match of rounds 1–5, all 20 teams |
 | Officials | **103** people, **300** crew assignments (referee, ARs, 4th, VAR, AVAR) |
-| Key Match Incidents | **24** cases from 10 matches, with on-field / post-VAR decisions |
-| Expert opinions | **28** from 10 experts (ex-referees, analysts, pundits) |
+| Key Match Incidents | **33** cases from 13 matches, with on-field / post-VAR decisions |
+| Expert opinions | **41** from 10 experts (ex-referees, analysts, pundits) |
 | Expert commendations | **14** "best of the round" picks (rounds 1, 2, 4), each verified against the crews |
-| Tests | 112, run in CI on Windows + Ubuntu, Python 3.10 + 3.13 |
+| Tests | 120, run in CI on Windows + Ubuntu, Python 3.10 + 3.13 |
 
 The crew data was independently confirmed: every official named in Nasser
 Abbas's round reviews matches our records (match and role).
@@ -33,7 +33,7 @@ Abbas's round reviews matches our records (match and role).
 - [x] Database schema, rules enforced in SQL
 - [x] Officials registry and crews, rounds 1–5
 - [x] Expert commendations ("best of the round"), verified against the crews
-- [~] **B. Case library** — 24 / ~100 cases; Arabic search + video-quiz export done; video links next
+- [~] **B. Case library** — 33 / ~100 cases; Arabic search + video-quiz export done; video links next
 - [ ] **A. Appointment assistant** — needs match-level cards and penalties (see Known gaps)
 - [ ] **C. Expert-opinion analysis** — agreement between experts, by background
 - [ ] **D. "What your data would add"** — clearly labelled mockups + methodology
@@ -117,17 +117,18 @@ tools/pull_bundle.bat  apply a commit bundle on Windows: pull → test → build
 ## Known gaps and limitations
 
 - **Selection bias.** Cases come from the press and from one expert's reviews,
-  not from watching every match. 11 of 24 cases involve Al Ahly; 10 of 50
-  matches have a case. Every case records how it was found (`found_via`).
+  not from watching every match. 14 of 33 cases involve Al Ahly and 13 Zamalek;
+  13 of 50 matches have a case. Every case records how it was found (`found_via`).
 - **No match events yet.** Goals and cards per match (`match_events`) are not
   collected; a legal source is still open. The appointment assistant needs it.
 - **No official rulings yet.** The committee rarely publishes rulings, so every
   case is currently "controversial" (no verdict).
 - Run `sofara-report` for the current numbers behind every item below.
-- **One unresolved name.** "محمد الشناوي" (VAR in R2 بيراميدز × أبو قير and
-  R5 بترول أسيوط × مودرن سبورت) is stored as its own official but is almost
-  certainly "محمد أحمد الشناوي" or "محمد علي الشناوي". Fix: add an alias and
-  delete the row from `officials.csv`.
+- **One unresolved name.** "محمد الشناوي" (VAR in R5 بترول أسيوط × مودرن سبورت)
+  is stored as its own official but is almost certainly "محمد أحمد الشناوي" or
+  "محمد علي الشناوي". (R2 بيراميدز × أبو قير was resolved to محمد علي الشناوي
+  from Nasser Abbas's review video.) Fix: add an alias and delete the row from
+  `officials.csv`.
 - **Commissioner / assessor** are not on Premier League crew cards, so those roles are empty.
 
 ## Ethics

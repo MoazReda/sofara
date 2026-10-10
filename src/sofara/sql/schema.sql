@@ -209,6 +209,7 @@ CREATE TABLE incident_decisions (
                            'play_on', 'penalty', 'free_kick',
                            'goal_awarded', 'goal_disallowed',
                            'penalty_retaken',           -- Law 14
+                           'corner', 'goal_kick',
                            'other')),
     source_url         TEXT,
     PRIMARY KEY (incident_id, stage),
