@@ -9,6 +9,7 @@ they are used, and what they are not.
 | Full legal names of one crew | EFA referee match report (Al Ahly × Sharqia ENPPI, R1), as published by Cairo24 | Read by hand | Used for aliases only. The image is not republished. |
 | Key Match Incidents | Press articles (إرم نيوز، الوطن، الكابتن، كل الكورة، الدستور) | Read in full, checked against our match/referee/score data before entry | 3 articles rejected because they described other seasons or rounds. |
 | Key Match Incidents + opinions | Nasser Abbas (former international referee, CAF referee assessor): https://www.facebook.com/nasserabbas.abbas | Notes taken by Moaz from his videos and posts | Covers matches the press ignores. |
+| Expert commendations | Nasser Abbas's "best of the round" posts (rounds 1, 2, 4) | Copied by Moaz from his page | Reasons summarised; post links still to add. |
 | Expert opinions | The articles and posts above | Summarised in our own words | Never the article text. |
 | Law changes | IFAB / FIFA media releases | Linked where used | e.g. VAR review of red cards from a clearly incorrect second yellow (28 Feb 2026). |
 

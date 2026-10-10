@@ -17,6 +17,7 @@ from pathlib import Path
 
 from sofara.build import DEFAULT_RAW, apply_schema, connect
 from sofara.cases import load_cases
+from sofara.commendations import load_commendations
 from sofara.registry import DataError, load_all
 
 ROLES_ON_CARDS = ("referee", "assistant_1", "assistant_2", "fourth", "var", "avar")
@@ -114,6 +115,17 @@ def report(conn: sqlite3.Connection) -> str:
             GROUP BY 1 ORDER BY 3 DESC"""),
     )
 
+    # ---- commendations (counts only: never a ranking of officials) ---------
+    lines += ["", "## Expert commendations (counts per round, no names)", ""]
+    lines += _table(
+        ["round", "referee", "assistant", "var"],
+        conn.execute("""
+            SELECT m.round, SUM(c.category = 'referee'), SUM(c.category = 'assistant'),
+                   SUM(c.category = 'var')
+            FROM expert_commendations c JOIN matches m USING (match_id)
+            GROUP BY m.round ORDER BY m.round"""),
+    )
+
     # ---- open issues ------------------------------------------------------------
     checks = [
         ("match events (goals and cards) collected", "SELECT COUNT(*) FROM match_events", True),
@@ -168,6 +180,7 @@ def main(argv: list[str] | None = None) -> int:
         try:
             load_all(conn, args.raw)
             load_cases(conn, args.raw)
+            load_commendations(conn, args.raw)
         except DataError as e:
             print("Data does not build — run sofara-build to see the problems.")
             print(f"({len(e.problems)} problem(s))")

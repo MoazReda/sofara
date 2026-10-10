@@ -18,6 +18,7 @@ from importlib.resources import files
 from pathlib import Path
 
 from sofara.cases import load_cases
+from sofara.commendations import load_commendations
 from sofara.registry import DataError, load_all
 
 DEFAULT_RAW = Path("data/raw")
@@ -56,6 +57,7 @@ def build(
         if not schema_only:
             counts.update(load_all(conn, raw_dir))
             counts.update(load_cases(conn, raw_dir))
+            counts.update(load_commendations(conn, raw_dir))
     finally:
         conn.close()
     tmp.replace(db_path)

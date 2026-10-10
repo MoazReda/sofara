@@ -16,3 +16,4 @@ broke. Format: Context → Decision → Consequences.
 | [0008](0008-track-discovery-source.md) | Every case records how it was found, to expose selection bias |
 | [0009](0009-ethics-public-data.md) | Public data is never presented as referee accuracy |
 | [0010](0010-premier-league-only.md) | Scope is the Egyptian Premier League only |
+| [0011](0011-commendations-no-ranking.md) | Expert commendations are stored, never ranked |

@@ -4,6 +4,7 @@ from pathlib import Path
 
 from sofara.build import apply_schema, connect
 from sofara.cases import load_cases
+from sofara.commendations import load_commendations
 from sofara.registry import load_all
 from sofara.report import main, report
 
@@ -15,6 +16,7 @@ def _real_db():
     apply_schema(conn)
     load_all(conn, RAW)
     load_cases(conn, RAW)
+    load_commendations(conn, RAW)
     return conn
 
 

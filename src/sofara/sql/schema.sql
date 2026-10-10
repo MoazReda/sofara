@@ -262,6 +262,25 @@ CREATE TABLE expert_opinions (
 );
 
 -- ---------------------------------------------------------------------
+-- expert_commendations: one row = one expert naming one official as a
+-- best performer in one category (referee / assistant / var) in one round.
+-- match_id is resolved by the loader from round + official + category and
+-- must match the crew data. Stored for analysis; never aggregated into a
+-- public ranking (docs/decisions/0011).
+-- ---------------------------------------------------------------------
+CREATE TABLE expert_commendations (
+    commendation_id  INTEGER PRIMARY KEY,
+    expert_id        INTEGER NOT NULL REFERENCES experts(expert_id),
+    official_id      INTEGER NOT NULL REFERENCES officials(official_id),
+    match_id         INTEGER NOT NULL REFERENCES matches(match_id),
+    category         TEXT    NOT NULL CHECK (category IN ('referee', 'assistant', 'var')),
+    reasons_ar       TEXT,                             -- the expert's stated reasons, summarised
+    source_url       TEXT    NOT NULL,
+    published_date   TEXT,
+    UNIQUE (expert_id, official_id, match_id, category)
+);
+
+-- ---------------------------------------------------------------------
 -- Indexes on foreign keys we will join on a lot
 -- ---------------------------------------------------------------------
 CREATE INDEX idx_match_officials_official ON match_officials(official_id);

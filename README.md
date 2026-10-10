@@ -22,7 +22,8 @@ committee's own data could add.
 | Officials | **103** people, **300** crew assignments (referee, ARs, 4th, VAR, AVAR) |
 | Key Match Incidents | **24** cases from 10 matches, with on-field / post-VAR decisions |
 | Expert opinions | **28** from 10 experts (ex-referees, analysts, pundits) |
-| Tests | 78, run in CI on Windows + Ubuntu, Python 3.10 + 3.13 |
+| Expert commendations | **14** "best of the round" picks (rounds 1, 2, 4), each verified against the crews |
+| Tests | 90, run in CI on Windows + Ubuntu, Python 3.10 + 3.13 |
 
 The crew data was independently confirmed: every official named in Nasser
 Abbas's round reviews matches our records (match and role).
@@ -31,6 +32,7 @@ Abbas's round reviews matches our records (match and role).
 
 - [x] Database schema, rules enforced in SQL
 - [x] Officials registry and crews, rounds 1–5
+- [x] Expert commendations ("best of the round"), verified against the crews
 - [~] **B. Case library** — schema + loader done; 24 / ~100 cases; Arabic search next
 - [ ] **A. Appointment assistant** — needs match-level cards and penalties (see Known gaps)
 - [ ] **C. Expert-opinion analysis** — agreement between experts, by background
@@ -91,7 +93,7 @@ tools/pull_bundle.bat  apply a commit bundle on Windows: pull → test → build
 
 ## Documentation
 
-- [Decision records](docs/decisions/README.md) — the 10 decisions that shape the project, and why
+- [Decision records](docs/decisions/README.md) — the 11 decisions that shape the project, and why
 - [Data dictionary](docs/data_dictionary.md) — every table, what one row means
 - [Sources](docs/SOURCES.md) — where every piece of data comes from
 
