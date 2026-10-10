@@ -1,5 +1,7 @@
 # Sofara (صفارة) — Egyptian Refereeing Analytics
 
+[![CI](https://github.com/MoazReda/sofara/actions/workflows/ci.yml/badge.svg)](https://github.com/MoazReda/sofara/actions/workflows/ci.yml)
+
 Data and ML tools for developing refereeing in the Egyptian Premier League,
 built on **real, public data only**.
 
