@@ -45,6 +45,7 @@ python -m venv .venv
 .venv\Scripts\activate            # Windows  (Linux/macOS: source .venv/bin/activate)
 pip install -e ".[dev]"           # the package + pytest + ruff
 sofara-build                      # rebuild data/sofara.db from data/raw/*.csv
+sofara-report                     # coverage, bias and open issues, as Markdown
 pytest
 ```
 
@@ -81,9 +82,11 @@ src/sofara/          the package
   registry.py        loads teams, officials, crews
   cases.py           loads the case library
   build.py           `sofara-build`
+  report.py          `sofara-report`
 data/raw/            hand-collected CSVs (source of truth)
 docs/                decisions, data dictionary, sources
 tests/               pytest suite
+tools/pull_bundle.bat  apply a commit bundle on Windows: pull → test → build → ask → push
 ```
 
 ## Documentation
@@ -101,6 +104,7 @@ tests/               pytest suite
   collected; a legal source is still open. The appointment assistant needs it.
 - **No official rulings yet.** The committee rarely publishes rulings, so every
   case is currently "controversial" (no verdict).
+- Run `sofara-report` for the current numbers behind every item below.
 - **One unresolved name.** "محمد الشناوي" (VAR in R2 بيراميدز × أبو قير and
   R5 بترول أسيوط × مودرن سبورت) is stored as its own official but is almost
   certainly "محمد أحمد الشناوي" or "محمد علي الشناوي". Fix: add an alias and
