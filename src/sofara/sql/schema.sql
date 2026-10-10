@@ -201,11 +201,15 @@ CREATE TABLE incident_decisions (
     stage              TEXT    NOT NULL CHECK (stage IN ('on_field', 'final', 'official')),
     offence            TEXT    NOT NULL CHECK (offence IN (
                            'none', 'foul', 'handball', 'offside',
-                           'simulation', 'violent_conduct', 'other')),
+                           'simulation', 'violent_conduct',
+                           'goalkeeper_encroachment',   -- Law 14: keeper off the line early
+                           'other')),
     offending_team_id  INTEGER REFERENCES teams(team_id),
     outcome            TEXT    NOT NULL CHECK (outcome IN (
                            'play_on', 'penalty', 'free_kick',
-                           'goal_awarded', 'goal_disallowed', 'other')),
+                           'goal_awarded', 'goal_disallowed',
+                           'penalty_retaken',           -- Law 14
+                           'other')),
     source_url         TEXT,
     PRIMARY KEY (incident_id, stage),
     -- an official ruling must be public and linkable
@@ -213,7 +217,8 @@ CREATE TABLE incident_decisions (
     -- an offence has an offending team; no offence, no team
     CHECK ((offence = 'none') = (offending_team_id IS NULL)),
     -- a penalty or a disallowed goal needs an offence
-    CHECK (outcome NOT IN ('penalty', 'goal_disallowed') OR offence <> 'none'),
+    CHECK (outcome NOT IN ('penalty', 'goal_disallowed', 'penalty_retaken')
+           OR offence <> 'none'),
     -- penalties come from fouls / handballs / violent conduct only
     CHECK (outcome <> 'penalty' OR offence IN ('foul', 'handball', 'violent_conduct')),
     -- offside: free kick, or the goal is disallowed

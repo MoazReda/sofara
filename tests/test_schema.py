@@ -302,6 +302,7 @@ def test_one_decision_per_stage(db):
         ("offside", 1, "play_on"),  # offside but play continued
         ("foul", None, "free_kick"),  # offence without offending team
         ("none", 1, "play_on"),  # offending team without offence
+        ("none", None, "penalty_retaken"),  # a retake needs a reason (keeper off the line)
     ],
 )
 def test_impossible_decisions_rejected(db, offence, team, outcome):

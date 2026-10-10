@@ -65,3 +65,8 @@ OFR,var,ofr
 الفار,var,any
 VAR,var,any
 تقنية الفيديو,var,any
+إعادة ركلة الجزاء,outcome,penalty_retaken
+إعادة البلنتي,outcome,penalty_retaken
+إعادة الركلة,outcome,penalty_retaken
+تقدم الحارس,offence,goalkeeper_encroachment
+خط المرمى,offence,goalkeeper_encroachment
