@@ -55,13 +55,23 @@ def report(conn: sqlite3.Connection) -> str:
     )
     # (no quotes reused inside f-strings: Python 3.10 doesn't allow it)
     officials = _one(conn, "SELECT COUNT(*) FROM officials")
+    foreign = _one(conn, "SELECT COUNT(*) FROM officials WHERE nationality <> 'Egypt'")
+    foreign_matches = _one(
+        conn,
+        "SELECT COUNT(DISTINCT mo.match_id) FROM match_officials mo"
+        " JOIN officials o USING (official_id) WHERE o.nationality <> 'Egypt'",
+    )
     aliases = _one(conn, "SELECT COUNT(*) FROM official_aliases")
     referees = _one(
         conn, "SELECT COUNT(DISTINCT official_id) FROM match_officials WHERE role = 'referee'"
     )
     lines += [
         "",
-        f"Officials: {officials}, aliases: {aliases}, distinct centre referees: {referees}",
+        f"Officials: {officials} ({foreign} foreign), aliases: {aliases}, "
+        f"distinct centre referees: {referees}",
+        "",
+        f"Matches with a foreign official: {foreign_matches} — kept for the case library, "
+        "left out of any analysis of Egyptian referees (decision 0014).",
         "",
     ]
 

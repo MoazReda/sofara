@@ -7,6 +7,7 @@ from sofara.cases import load_cases
 from sofara.commendations import load_commendations
 from sofara.registry import load_all
 from sofara.report import main, report
+from sofara.reviews import load_reviews
 
 RAW = Path(__file__).resolve().parent.parent / "data" / "raw"
 
@@ -17,6 +18,7 @@ def _real_db():
     load_all(conn, RAW)
     load_cases(conn, RAW)
     load_commendations(conn, RAW)
+    load_reviews(conn, RAW)
     return conn
 
 
@@ -25,6 +27,7 @@ def test_report_has_every_section():
     for heading in (
         "## Matches and crews",
         "## Case library",
+        "## Match coverage",
         "## Selection bias",
         "## Expert opinions",
         "## Open issues",
@@ -46,3 +49,9 @@ def test_report_flags_missing_match_events():
 def test_cli_runs(capsys):
     assert main(["--raw", str(RAW)]) == 0
     assert "# Sofara data report" in capsys.readouterr().out
+
+
+def test_foreign_officials_are_counted_apart():
+    conn = _real_db()
+    n = conn.execute("SELECT COUNT(*) FROM officials WHERE nationality <> 'Egypt'").fetchone()[0]
+    assert f"({n} foreign)" in report(conn)

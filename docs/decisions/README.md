@@ -19,3 +19,4 @@ broke. Format: Context → Decision → Consequences.
 | [0011](0011-commendations-no-ranking.md) | Expert commendations are stored, never ranked |
 | [0012](0012-recall-first-search.md) | Search is recall-first and explains every match |
 | [0013](0013-measure-coverage-not-case-count.md) | Progress is match coverage, not a case count |
+| [0014](0014-foreign-crews.md) | Foreign crews are recorded, never analysed as Egyptian referees |
