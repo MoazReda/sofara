@@ -287,6 +287,26 @@ CREATE TABLE expert_commendations (
 );
 
 -- ---------------------------------------------------------------------
+-- match_reviews: one row = one source that went through the refereeing
+-- of one whole match (an expert's match review, a press round-up, or our
+-- own viewing). It answers "has anyone looked at this match?", so a match
+-- with no cases can be told apart from a match nobody checked yet.
+-- How many cases a match has is computed (v_match_coverage), never typed.
+-- ---------------------------------------------------------------------
+CREATE TABLE match_reviews (
+    review_id        INTEGER PRIMARY KEY,
+    match_id         INTEGER NOT NULL REFERENCES matches(match_id),
+    review_type      TEXT    NOT NULL
+                     CHECK (review_type IN ('expert_review', 'press', 'match_review')),
+    expert_id        INTEGER REFERENCES experts(expert_id),
+    source_url       TEXT    NOT NULL,
+    published_date   TEXT,
+    notes_ar         TEXT,
+    UNIQUE (match_id, source_url),
+    CHECK (review_type <> 'expert_review' OR expert_id IS NOT NULL)
+);
+
+-- ---------------------------------------------------------------------
 -- Indexes on foreign keys we will join on a lot
 -- ---------------------------------------------------------------------
 CREATE INDEX idx_match_officials_official ON match_officials(official_id);
@@ -294,6 +314,7 @@ CREATE INDEX idx_match_events_match       ON match_events(match_id);
 CREATE INDEX idx_incidents_match          ON incidents(match_id);
 CREATE INDEX idx_sanctions_decision       ON incident_sanctions(incident_id, stage);
 CREATE INDEX idx_opinions_incident        ON expert_opinions(incident_id);
+CREATE INDEX idx_reviews_match            ON match_reviews(match_id);
 CREATE INDEX idx_official_aliases_off     ON official_aliases(official_id);
 
 -- ---------------------------------------------------------------------
@@ -386,3 +407,12 @@ CREATE VIEW v_official_lookup AS
 SELECT name_ar AS name, official_id FROM officials
 UNION
 SELECT alias   AS name, official_id FROM official_aliases;
+
+-- one row = one match: how many sources reviewed it, how many cases it has.
+-- reviewed = 0 means nobody has checked the match yet; reviewed > 0 with
+-- cases = 0 means it was checked and nothing was contested.
+CREATE VIEW v_match_coverage AS
+SELECT m.match_id, m.season, m.round, m.home_team_id, m.away_team_id,
+       (SELECT COUNT(*) FROM match_reviews r WHERE r.match_id = m.match_id) AS reviews,
+       (SELECT COUNT(*) FROM incidents i WHERE i.match_id = m.match_id)     AS cases
+FROM matches m;

@@ -19,6 +19,7 @@ from sofara.build import DEFAULT_RAW, apply_schema, connect
 from sofara.cases import load_cases
 from sofara.commendations import load_commendations
 from sofara.registry import DataError, load_all
+from sofara.reviews import load_reviews
 
 ROLES_ON_CARDS = ("referee", "assistant_1", "assistant_2", "fourth", "var", "avar")
 
@@ -90,6 +91,25 @@ def report(conn: sqlite3.Connection) -> str:
         conn.execute("SELECT status, COUNT(*) FROM v_incident_summary GROUP BY 1"),
     )
 
+    # ---- coverage: has anyone looked at each match? -------------------------
+    lines += ["", "## Match coverage", ""]
+    lines += _table(
+        ["round", "matches", "reviewed", "reviewed, no case", "with a case", "not reviewed yet"],
+        conn.execute("""
+            SELECT round, COUNT(*), SUM(reviews > 0), SUM(reviews > 0 AND cases = 0),
+                   SUM(cases > 0), SUM(reviews = 0)
+            FROM v_match_coverage GROUP BY round ORDER BY round"""),
+    )
+    todo = conn.execute("""
+        SELECT c.round, h.name_ar, a.name_ar FROM v_match_coverage c
+        JOIN teams h ON h.team_id = c.home_team_id
+        JOIN teams a ON a.team_id = c.away_team_id
+        WHERE c.reviews = 0 ORDER BY c.round, h.name_ar""").fetchall()
+    if todo:
+        lines += ["", "<details><summary>Matches not reviewed yet</summary>", ""]
+        lines += [f"- R{r}: {home} × {away}" for r, home, away in todo]
+        lines += ["", "</details>"]
+
     # ---- selection bias -----------------------------------------------------
     lines += ["", "## Selection bias: cases per team", ""]
     lines += _table(
@@ -129,6 +149,16 @@ def report(conn: sqlite3.Connection) -> str:
     # ---- open issues ------------------------------------------------------------
     checks = [
         ("match events (goals and cards) collected", "SELECT COUNT(*) FROM match_events", True),
+        (
+            "matches nobody has reviewed yet",
+            "SELECT COUNT(*) FROM v_match_coverage WHERE reviews = 0",
+            False,
+        ),
+        (
+            "cases from a match with no review row",
+            "SELECT COALESCE(SUM(cases), 0) FROM v_match_coverage WHERE reviews = 0",
+            False,
+        ),
         ("cases without a minute", "SELECT COUNT(*) FROM incidents WHERE minute IS NULL", False),
         (
             "cases with unknown VAR involvement",
@@ -181,6 +211,7 @@ def main(argv: list[str] | None = None) -> int:
             load_all(conn, args.raw)
             load_cases(conn, args.raw)
             load_commendations(conn, args.raw)
+            load_reviews(conn, args.raw)
         except DataError as e:
             print("Data does not build — run sofara-build to see the problems.")
             print(f"({len(e.problems)} problem(s))")

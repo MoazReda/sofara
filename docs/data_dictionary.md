@@ -29,9 +29,10 @@ Roles: `referee`, `assistant_1`, `assistant_2`, `fourth`, `var`, `avar`,
 | `experts` | one commentator, with background | `expert_id` | `experts.csv` |
 | `expert_opinions` | one expert's view on one incident from one source | `opinion_id`; unique per incident + expert + source | `expert_opinions.csv` |
 | `expert_commendations` | one expert naming one official as a best performer in one category (referee / assistant / var) in one round | `commendation_id`; match resolved from the crews | `commendations.csv` |
+| `match_reviews` | one source that went through the refereeing of one whole match (expert_review / press / match_review) | `review_id`; unique per match + source | `match_reviews.csv` |
 
 - **Stages:** `on_field` (the referee) → `final` (after VAR; absent = unchanged) → `official` (published committee ruling, link required).
-- **Decision axes:** `offence` (none, foul, handball, offside, simulation, violent_conduct, other) · `offending_team_id` · `outcome` (play_on, penalty, free_kick, goal_awarded, goal_disallowed, other).
+- **Decision axes:** `offence` (none, foul, handball, offside, simulation, violent_conduct, goalkeeper_encroachment, other) · `offending_team_id` · `outcome` (play_on, penalty, free_kick, goal_awarded, goal_disallowed, penalty_retaken, corner, goal_kick, other).
 - **`var_review`:** unknown, none, check_only, ofr. Unknown is the default — never assume "none".
 - **`found_via`:** press, expert_review, match_review ([why](decisions/0008-track-discovery-source.md)).
 - **Expert background:** ex_referee, analyst, ex_player, journalist, committee (as reported by the press), committee_source (anonymous).
@@ -45,3 +46,4 @@ Roles: `referee`, `assistant_1`, `assistant_2`, `fourth`, `var`, `avar`,
 | `v_decision_signature` | one comparable text per decision (offence, outcome, sorted cards) — used to detect changes |
 | `v_incident_problems` | incidents missing an on-field decision (must be empty; the loader checks) |
 | `v_official_lookup` | any spelling (name or alias) → `official_id` |
+| `v_match_coverage` | one row per match: number of reviews and of cases (reviews = 0 → nobody looked yet) |
