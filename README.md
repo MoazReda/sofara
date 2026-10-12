@@ -123,10 +123,9 @@ tools/pull_bundle.bat  apply a commit bundle on Windows: pull → test → build
   Only 17 of 51 matches have been reviewed so far; `sofara-report` lists the rest. Every case records how it was found (`found_via`).
 - **No match events yet.** Goals and cards per match (`match_events`) are not
   collected; a legal source is still open. The appointment assistant needs it.
-- **Official rulings come second-hand.** 19 cases have a ruling from the
-  committee's own round videos ([decision 0015](docs/decisions/0015-committee-round-videos-are-rulings.md)),
-  but what each video says is taken from press reports until someone watches
-  them. Verdicts cover debated cases only, never an error rate.
+- **Verdicts cover debated cases only.** 19 cases have a ruling from the
+  committee's own round videos ([decision 0015](docs/decisions/0015-committee-round-videos-are-rulings.md));
+  they were picked because they were debated, so they are never an error rate.
 - Run `sofara-report` for the current numbers behind every item below.
 - **One unresolved name.** "محمد الشناوي" (VAR in R5 بترول أسيوط × مودرن سبورت)
   is stored as its own official but is almost certainly "محمد أحمد الشناوي" or

@@ -18,8 +18,8 @@ match also counts as a review of that match (`match_reviews`).
 **Consequences.** All five round videos are linked (EFA Facebook reels:
 R1 1561638358556934, R2 1287410006693633, R3 1698670264551381,
 R4 2024526304868493, R5 1039780975731497), giving 19 ruled cases. What each
-video says is taken from press reports of it (Al-Watan, النهار المصري, إرم
-نيوز, تليجراف مصر); watching the videos to confirm them is still to do. The
+video says was first taken from press reports of it (Al-Watan, النهار المصري,
+إرم نيوز, تليجراف مصر), then confirmed by Moaz watching all five (2026-10-12). The
 second-hand committee opinions those rulings replace were removed, so the
 committee is not counted twice. The verdict is split into `call_verdict` and
 `card_verdict`, so a right call with a missed card (case 1) is not read as a
