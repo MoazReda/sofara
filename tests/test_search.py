@@ -48,10 +48,10 @@ GOLD = {
     "لمسة يد": {2, 3, 12, 25, 32, 36, 38, 39},
     "هاند": {2, 3, 12, 25, 32, 36, 38, 39},
     "تسلل": {5, 10, 26, 41},
-    "هدف ملغي": {5, 10, 18, 41, 42},
-    "طرد": {6, 15, 23, 24, 11, 29, 31},
-    "راح الشاشة": {15, 16},
-    "الفار غير القرار": {15, 26},
+    "هدف ملغي": {5, 10, 18, 41, 42, 43, 44},
+    "طرد": {6, 15, 23, 24, 11, 29, 31, 45},
+    "راح الشاشة": {15, 16, 43},
+    "الفار غير القرار": {15, 26, 43, 44},
     "استارز": {24},
     "حارس": {15, 22, 35},
     "الأهلي بلنتي": {1, 2, 3, 7, 8, 9, 13, 34, 35, 37, 38},
@@ -113,8 +113,9 @@ def test_referee_name_filters(conn, vocab):
 
 
 def test_different_kinds_are_anded(conn, vocab):
-    # penalty AND VAR changed the decision: none in the current library
-    assert ids(conn, vocab, "بلنتي الفار غير القرار") == []
+    # penalty AND VAR changed the decision: only case 44 (rebound of a saved
+    # penalty disallowed); a plain "penalty" case where VAR changed nothing must not appear
+    assert ids(conn, vocab, "بلنتي الفار غير القرار") == [44]
 
 
 def test_round_filter(conn, vocab):
@@ -129,7 +130,7 @@ def test_unknown_word_must_appear_in_text(conn, vocab):
 def test_quiz_hides_answers_and_flags_controversy(conn, vocab):
     q = parse(conn, "راح الشاشة", vocab)
     quiz = format_quiz(q, search(conn, q))
-    assert quiz.count("<details>") == 2
+    assert quiz.count("<details>") == 3  # cases 15, 16, 43
     assert "حالة جدلية" in quiz
     assert "بعد مراجعة الـVAR" in quiz
 

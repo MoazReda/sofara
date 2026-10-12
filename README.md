@@ -20,9 +20,9 @@ committee's own data could add.
 |---|---|
 | Matches | **51** — every match of rounds 1–5, all 20 teams, and round 6 as crews are announced |
 | Officials | **109** people (6 of them a foreign crew, [kept apart](docs/decisions/0014-foreign-crews.md)), **306** crew assignments |
-| Match coverage | **17 of 51** matches reviewed by at least one source ([why we count this](docs/decisions/0013-measure-coverage-not-case-count.md)) |
-| Key Match Incidents | **42** cases from those 17 matches, with on-field / post-VAR decisions; **19** with an official committee ruling |
-| Expert opinions | **50** from 13 sources (ex-referees, analysts, pundits, the committee as reported) |
+| Match coverage | **19 of 51** matches reviewed by at least one source ([why we count this](docs/decisions/0013-measure-coverage-not-case-count.md)) |
+| Key Match Incidents | **45** cases from those 19 matches, with on-field / post-VAR decisions; **20** with an official committee ruling |
+| Expert opinions | **52** from 14 sources (ex-referees, analysts, pundits, the committee as reported) |
 | Expert commendations | **14** "best of the round" picks (rounds 1, 2, 4), each verified against the crews |
 | Tests | 131, run in CI on Windows + Ubuntu, Python 3.10 + 3.13 |
 
@@ -34,7 +34,7 @@ Abbas's round reviews matches our records (match and role).
 - [x] Database schema, rules enforced in SQL
 - [x] Officials registry and crews, rounds 1–5
 - [x] Expert commendations ("best of the round"), verified against the crews
-- [~] **B. Case library** — 17 / 51 matches reviewed, 42 cases; Arabic search + video-quiz export done
+- [~] **B. Case library** — 19 / 51 matches reviewed, 45 cases; Arabic search + video-quiz export done
 - [ ] **A. Appointment assistant** — needs match-level cards and penalties (see Known gaps)
 - [ ] **C. Expert-opinion analysis** — agreement between experts, by background
 - [ ] **D. "What your data would add"** — clearly labelled mockups + methodology
@@ -119,11 +119,11 @@ tools/pull_bundle.bat  apply a commit bundle on Windows: pull → test → build
 ## Known gaps and limitations
 
 - **Selection bias.** Cases come from the press and from one expert's reviews,
-  not from watching every match. 19 of 42 cases involve Al Ahly and 19 Zamalek.
-  Only 17 of 51 matches have been reviewed so far; `sofara-report` lists the rest. Every case records how it was found (`found_via`).
+  not from watching every match. 19 of 45 cases involve Al Ahly and 19 Zamalek.
+  Only 19 of 51 matches have been reviewed so far; `sofara-report` lists the rest. Every case records how it was found (`found_via`).
 - **No match events yet.** Goals and cards per match (`match_events`) are not
   collected; a legal source is still open. The appointment assistant needs it.
-- **Verdicts cover debated cases only.** 19 cases have a ruling from the
+- **Verdicts cover debated cases only.** 20 cases have a ruling from the
   committee's own round videos ([decision 0015](docs/decisions/0015-committee-round-videos-are-rulings.md));
   they were picked because they were debated, so they are never an error rate.
 - Run `sofara-report` for the current numbers behind every item below.
