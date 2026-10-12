@@ -359,14 +359,17 @@ BEGIN SELECT RAISE(ABORT, 'sanctioned team did not play in this match'); END;
 -- one text "signature" per decision (offence | outcome | sorted cards),
 -- so two decisions can be compared with a single `=`
 CREATE VIEW v_decision_signature AS
-SELECT d.incident_id, d.stage,
-       d.offence || '|' || d.outcome || '|' || COALESCE((
-           SELECT group_concat(card, ';') FROM (
-               SELECT s.person_name || ':' || s.sanction || ':' || COALESCE(s.reason, '') AS card
-               FROM incident_sanctions s
-               WHERE s.incident_id = d.incident_id AND s.stage = d.stage
-               ORDER BY card)), '') AS signature
-FROM incident_decisions d;
+SELECT incident_id, stage, call, cards, call || '|' || cards AS signature
+FROM (
+    SELECT d.incident_id, d.stage,
+           d.offence || '|' || d.outcome AS call,          -- what was given
+           COALESCE((
+               SELECT group_concat(card, ';') FROM (
+                   SELECT s.person_name || ':' || s.sanction || ':' || COALESCE(s.reason, '') AS card
+                   FROM incident_sanctions s
+                   WHERE s.incident_id = d.incident_id AND s.stage = d.stage
+                   ORDER BY card)), '') AS cards                -- who was booked
+    FROM incident_decisions d);
 
 -- one row per incident: on-field vs final, did VAR change it, verdict
 CREATE VIEW v_incident_summary AS
@@ -384,6 +387,14 @@ SELECT
     CASE WHEN off.incident_id IS NULL THEN NULL
          WHEN COALESCE(sf.signature, so.signature) = sx.signature THEN 'correct'
          ELSE 'incorrect' END                              AS verdict,
+    -- the same verdict split in two, so "right call, missed card" is not
+    -- read as "wrong call" (e.g. a correct penalty without the yellow card)
+    CASE WHEN off.incident_id IS NULL THEN NULL
+         WHEN COALESCE(sf.call, so.call) = sx.call THEN 'correct'
+         ELSE 'incorrect' END                              AS call_verdict,
+    CASE WHEN off.incident_id IS NULL THEN NULL
+         WHEN COALESCE(sf.cards, so.cards) = sx.cards THEN 'correct'
+         ELSE 'incorrect' END                              AS card_verdict,
     off.source_url                                         AS verdict_source_url
 FROM incidents i
 LEFT JOIN match_officials mo

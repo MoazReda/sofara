@@ -21,10 +21,10 @@ committee's own data could add.
 | Matches | **51** — every match of rounds 1–5, all 20 teams, and round 6 as crews are announced |
 | Officials | **109** people (6 of them a foreign crew, [kept apart](docs/decisions/0014-foreign-crews.md)), **306** crew assignments |
 | Match coverage | **17 of 51** matches reviewed by at least one source ([why we count this](docs/decisions/0013-measure-coverage-not-case-count.md)) |
-| Key Match Incidents | **42** cases from those 17 matches, with on-field / post-VAR decisions; **5** with an official committee ruling |
-| Expert opinions | **62** from 13 sources (ex-referees, analysts, pundits, the committee as reported) |
+| Key Match Incidents | **42** cases from those 17 matches, with on-field / post-VAR decisions; **19** with an official committee ruling |
+| Expert opinions | **50** from 13 sources (ex-referees, analysts, pundits, the committee as reported) |
 | Expert commendations | **14** "best of the round" picks (rounds 1, 2, 4), each verified against the crews |
-| Tests | 129, run in CI on Windows + Ubuntu, Python 3.10 + 3.13 |
+| Tests | 131, run in CI on Windows + Ubuntu, Python 3.10 + 3.13 |
 
 The crew data was independently confirmed: every official named in Nasser
 Abbas's round reviews matches our records (match and role).
@@ -123,9 +123,10 @@ tools/pull_bundle.bat  apply a commit bundle on Windows: pull → test → build
   Only 17 of 51 matches have been reviewed so far; `sofara-report` lists the rest. Every case records how it was found (`found_via`).
 - **No match events yet.** Goals and cards per match (`match_events`) are not
   collected; a legal source is still open. The appointment assistant needs it.
-- **Few official rulings.** Only 5 cases have a ruling the committee published
-  itself (round 5 video); the rest are "controversial" (no verdict). The
-  rounds 1–4 videos still need their EFA links ([decision 0015](docs/decisions/0015-committee-round-videos-are-rulings.md)).
+- **Official rulings come second-hand.** 19 cases have a ruling from the
+  committee's own round videos ([decision 0015](docs/decisions/0015-committee-round-videos-are-rulings.md)),
+  but what each video says is taken from press reports until someone watches
+  them. Verdicts cover debated cases only, never an error rate.
 - Run `sofara-report` for the current numbers behind every item below.
 - **One unresolved name.** "محمد الشناوي" (VAR in R5 بترول أسيوط × مودرن سبورت)
   is stored as its own official but is almost certainly "محمد أحمد الشناوي" or

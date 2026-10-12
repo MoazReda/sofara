@@ -11,8 +11,8 @@ they are used, and what they are not.
 | Key Match Incidents + opinions | Nasser Abbas (former international referee, CAF referee assessor): https://www.facebook.com/nasserabbas.abbas | Notes taken by Moaz from his videos and posts | Covers matches the press ignores. |
 | Expert commendations | Nasser Abbas's "best of the round" posts (rounds 1, 2, 4) | Copied by Moaz from his page | Reasons summarised; post links still to add. |
 | Match reviews | Nasser Abbas's per-match review reels (13 matches, rounds 1–5) | Links collected by Moaz from his public Facebook profile | Links only; one row per match per source. |
-| Official rulings | Referees Committee round videos on the EFA Facebook page (round 5: https://www.facebook.com/reel/1039780975731497) | Verdicts as reported by Al-Watan, linked to the video | Rounds 1–4 videos not linked yet ([decision 0015](decisions/0015-committee-round-videos-are-rulings.md)). |
-| Committee positions (second-hand) | النهار المصري, 2026-09-20 — summary of the committee's analysis of rounds 1–4 | Stored as opinions of لجنة الحكام (بحسب الصحافة) | It calls السويس بتروجيت "منتخب السويس"; matched by round and incident. |
+| Official rulings | Referees Committee round videos on the EFA Facebook page — R1 https://www.facebook.com/reel/1561638358556934, R2 https://www.facebook.com/reel/1287410006693633, R3 https://www.facebook.com/reel/1698670264551381, R4 https://www.facebook.com/reel/2024526304868493, R5 https://www.facebook.com/reel/1039780975731497 | Links found by Moaz; verdicts as reported by the press, to be confirmed by watching | [Decision 0015](decisions/0015-committee-round-videos-are-rulings.md). |
+| Committee positions (second-hand) | النهار المصري, 2026-09-20 — summary of the committee's analysis of rounds 1–4 | Used to read the round videos; describes cases 40–42 | It calls السويس بتروجيت "منتخب السويس"; matched by round and incident. |
 | Expert opinions | The articles and posts above | Summarised in our own words | Never the article text. |
 | Law changes | IFAB / FIFA media releases | Linked where used | e.g. VAR review of red cards from a clearly incorrect second yellow (28 Feb 2026). |
 

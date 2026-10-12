@@ -15,8 +15,14 @@ publication in `official_source_url`. The same position reported second-hand
 `لجنة الحكام (بحسب الصحافة)`, as before. A committee video that covers a
 match also counts as a review of that match (`match_reviews`).
 
-**Consequences.** The library has its first computed verdicts (5 cases, all
-"correct"). The verdict is the committee's, not ours, and where an expert
-disagrees with it (case 27: Abbas on the VAR protocol) both stay visible.
-Rounds 1–4 videos exist but we have only press reports of them, so those
-positions remain opinions until the EFA links are found.
+**Consequences.** All five round videos are linked (EFA Facebook reels:
+R1 1561638358556934, R2 1287410006693633, R3 1698670264551381,
+R4 2024526304868493, R5 1039780975731497), giving 19 ruled cases. What each
+video says is taken from press reports of it (Al-Watan, النهار المصري, إرم
+نيوز, تليجراف مصر); watching the videos to confirm them is still to do. The
+second-hand committee opinions those rulings replace were removed, so the
+committee is not counted twice. The verdict is split into `call_verdict` and
+`card_verdict`, so a right call with a missed card (case 1) is not read as a
+wrong call. The verdict is the committee's, not ours; where an expert
+disagrees with it, both stay visible. Verdicts cover debated cases only, so
+they are never an error rate for a referee or a round.

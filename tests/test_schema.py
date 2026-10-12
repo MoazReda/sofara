@@ -282,6 +282,20 @@ def test_official_ruling_with_different_card_is_incorrect(db):
     assert _summary(db, "verdict") == "incorrect"
 
 
+def test_right_call_with_wrong_card_is_split(db):
+    # the call (penalty for handball) was right, only the card was wrong
+    iid = _var_overturned(db)
+    _decision(db, iid, "official", "handball", 2, "penalty", url="https://example.org/r")
+    _card(db, iid, "official", "yellow", "unsporting_behaviour")
+    assert (_summary(db, "call_verdict"), _summary(db, "card_verdict")) == ("correct", "incorrect")
+
+
+def test_wrong_call_is_split_too(db):
+    iid = _var_overturned(db)
+    _decision(db, iid, "official", "none", None, "play_on", url="https://example.org/r")
+    assert _summary(db, "call_verdict") == "incorrect"
+
+
 def test_official_ruling_requires_source(db):
     iid = _var_overturned(db)
     with pytest.raises(sqlite3.IntegrityError):

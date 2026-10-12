@@ -101,6 +101,22 @@ def report(conn: sqlite3.Connection) -> str:
         conn.execute("SELECT status, COUNT(*) FROM v_incident_summary GROUP BY 1"),
     )
 
+    # ---- official rulings (the committee's own verdicts) ---------------------
+    lines += ["", "## Official rulings", ""]
+    lines += _table(
+        ["round", "ruled cases", "call correct", "call incorrect", "card incorrect"],
+        conn.execute("""
+            SELECT m.round, COUNT(*), SUM(s.call_verdict = 'correct'),
+                   SUM(s.call_verdict = 'incorrect'), SUM(s.card_verdict = 'incorrect')
+            FROM v_incident_summary s JOIN matches m USING (match_id)
+            WHERE s.status = 'ruled' GROUP BY m.round ORDER BY m.round"""),
+    )
+    lines += [
+        "",
+        "These are verdicts on the cases in our library, which were picked because they were "
+        "debated, so they are not an error rate for any referee or round.",
+    ]
+
     # ---- coverage: has anyone looked at each match? -------------------------
     lines += ["", "## Match coverage", ""]
     lines += _table(

@@ -28,6 +28,7 @@ def test_report_has_every_section():
         "## Matches and crews",
         "## Case library",
         "## Match coverage",
+        "## Official rulings",
         "## Selection bias",
         "## Expert opinions",
         "## Open issues",

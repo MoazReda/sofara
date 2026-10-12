@@ -42,7 +42,7 @@ Roles: `referee`, `assistant_1`, `assistant_2`, `fourth`, `var`, `avar`,
 
 | View | Gives |
 |---|---|
-| `v_incident_summary` | one row per incident: referee, on-field vs final decision, `var_changed`, `status` (controversial / ruled), `verdict` (correct / incorrect / NULL) |
+| `v_incident_summary` | one row per incident: referee, on-field vs final decision, `var_changed`, `status` (controversial / ruled), `verdict` (correct / incorrect / NULL), split into `call_verdict` (offence + outcome) and `card_verdict` (cards) |
 | `v_decision_signature` | one comparable text per decision (offence, outcome, sorted cards) — used to detect changes |
 | `v_incident_problems` | incidents missing an on-field decision (must be empty; the loader checks) |
 | `v_official_lookup` | any spelling (name or alias) → `official_id` |
