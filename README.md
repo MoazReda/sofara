@@ -20,11 +20,11 @@ committee's own data could add.
 |---|---|
 | Matches | **51** — every match of rounds 1–5, all 20 teams, and round 6 as crews are announced |
 | Officials | **109** people (6 of them a foreign crew, [kept apart](docs/decisions/0014-foreign-crews.md)), **306** crew assignments |
-| Match coverage | **13 of 51** matches reviewed by at least one source ([why we count this](docs/decisions/0013-measure-coverage-not-case-count.md)) |
-| Key Match Incidents | **33** cases from those 13 matches, with on-field / post-VAR decisions |
-| Expert opinions | **41** from 10 experts (ex-referees, analysts, pundits) |
+| Match coverage | **14 of 51** matches reviewed by at least one source ([why we count this](docs/decisions/0013-measure-coverage-not-case-count.md)) |
+| Key Match Incidents | **38** cases from those 14 matches, with on-field / post-VAR decisions |
+| Expert opinions | **50** from 12 experts (ex-referees, analysts, pundits) |
 | Expert commendations | **14** "best of the round" picks (rounds 1, 2, 4), each verified against the crews |
-| Tests | 127, run in CI on Windows + Ubuntu, Python 3.10 + 3.13 |
+| Tests | 129, run in CI on Windows + Ubuntu, Python 3.10 + 3.13 |
 
 The crew data was independently confirmed: every official named in Nasser
 Abbas's round reviews matches our records (match and role).
@@ -34,7 +34,7 @@ Abbas's round reviews matches our records (match and role).
 - [x] Database schema, rules enforced in SQL
 - [x] Officials registry and crews, rounds 1–5
 - [x] Expert commendations ("best of the round"), verified against the crews
-- [~] **B. Case library** — 13 / 51 matches reviewed, 33 cases; Arabic search + video-quiz export done
+- [~] **B. Case library** — 14 / 51 matches reviewed, 38 cases; Arabic search + video-quiz export done
 - [ ] **A. Appointment assistant** — needs match-level cards and penalties (see Known gaps)
 - [ ] **C. Expert-opinion analysis** — agreement between experts, by background
 - [ ] **D. "What your data would add"** — clearly labelled mockups + methodology
@@ -119,8 +119,8 @@ tools/pull_bundle.bat  apply a commit bundle on Windows: pull → test → build
 ## Known gaps and limitations
 
 - **Selection bias.** Cases come from the press and from one expert's reviews,
-  not from watching every match. 14 of 33 cases involve Al Ahly and 13 Zamalek;
-  Only 13 of 51 matches have been reviewed so far; `sofara-report` lists the rest. Every case records how it was found (`found_via`).
+  not from watching every match. 19 of 38 cases involve Al Ahly and 18 Zamalek;
+  Only 14 of 51 matches have been reviewed so far; `sofara-report` lists the rest. Every case records how it was found (`found_via`).
 - **No match events yet.** Goals and cards per match (`match_events`) are not
   collected; a legal source is still open. The appointment assistant needs it.
 - **No official rulings yet.** The committee rarely publishes rulings, so every
