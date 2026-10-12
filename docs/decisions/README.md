@@ -20,3 +20,4 @@ broke. Format: Context → Decision → Consequences.
 | [0012](0012-recall-first-search.md) | Search is recall-first and explains every match |
 | [0013](0013-measure-coverage-not-case-count.md) | Progress is match coverage, not a case count |
 | [0014](0014-foreign-crews.md) | Foreign crews are recorded, never analysed as Egyptian referees |
+| [0015](0015-committee-round-videos-are-rulings.md) | The committee's own round videos are official rulings |

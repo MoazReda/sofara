@@ -1,3 +1,4 @@
 ﻿case_id,stage,team,person_name,sanction,reason
 15,final,طلائع الجيش,حارس مرمى طلائع الجيش,red,serious_foul_play
 11,on_field,غزل المحلة,لاعب غزل المحلة,yellow,
+11,official,غزل المحلة,لاعب غزل المحلة,yellow,
