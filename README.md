@@ -24,7 +24,7 @@ committee's own data could add.
 | Key Match Incidents | **45** cases from those 19 matches, with on-field / post-VAR decisions; **20** with an official committee ruling |
 | Expert opinions | **52** from 14 sources (ex-referees, analysts, pundits, the committee as reported) |
 | Expert commendations | **14** "best of the round" picks (rounds 1, 2, 4), each verified against the crews |
-| Tests | 131, run in CI on Windows + Ubuntu, Python 3.10 + 3.13 |
+| Tests | 133, run in CI on Windows + Ubuntu, Python 3.10 + 3.13 |
 
 The crew data was independently confirmed: every official named in Nasser
 Abbas's round reviews matches our records (match and role).
@@ -100,6 +100,7 @@ src/sofara/          the package
   registry.py        loads teams, officials, crews
   cases.py           loads the case library
   reviews.py         loads match reviews (coverage)
+  efa_lists.py       loads the EFA's own referee lists (committee, international, first degree)
   build.py           `sofara-build`
   report.py          `sofara-report`
   search.py          `sofara-search` + video-quiz export

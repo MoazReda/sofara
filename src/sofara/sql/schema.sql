@@ -307,6 +307,25 @@ CREATE TABLE match_reviews (
 );
 
 -- ---------------------------------------------------------------------
+-- efa_lists: one row = one name on one official EFA list (the main
+-- Referees Committee, the international (FIFA) list, the first-degree
+-- referees). Lists include people outside our data (women's football,
+-- futsal, committee members), so official_id is NULL when the name is not
+-- one of our officials. season_label is what the EFA page says, which can
+-- lag behind the real season.
+-- ---------------------------------------------------------------------
+CREATE TABLE efa_lists (
+    list          TEXT    NOT NULL
+                  CHECK (list IN ('main_committee', 'international', 'first_degree_referee')),
+    name_ar       TEXT    NOT NULL,
+    official_id   INTEGER REFERENCES officials(official_id),
+    region        TEXT,
+    season_label  TEXT,
+    source_url    TEXT    NOT NULL,
+    PRIMARY KEY (list, name_ar)
+);
+
+-- ---------------------------------------------------------------------
 -- Indexes on foreign keys we will join on a lot
 -- ---------------------------------------------------------------------
 CREATE INDEX idx_match_officials_official ON match_officials(official_id);

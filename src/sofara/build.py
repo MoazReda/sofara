@@ -19,6 +19,7 @@ from pathlib import Path
 
 from sofara.cases import load_cases
 from sofara.commendations import load_commendations
+from sofara.efa_lists import load_efa_lists
 from sofara.registry import DataError, load_all
 from sofara.reviews import load_reviews
 
@@ -60,6 +61,7 @@ def build(
             counts.update(load_cases(conn, raw_dir))
             counts.update(load_commendations(conn, raw_dir))
             counts.update(load_reviews(conn, raw_dir))
+            counts.update(load_efa_lists(conn, raw_dir))
     finally:
         conn.close()
     tmp.replace(db_path)

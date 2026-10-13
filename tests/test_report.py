@@ -5,6 +5,7 @@ from pathlib import Path
 from sofara.build import apply_schema, connect
 from sofara.cases import load_cases
 from sofara.commendations import load_commendations
+from sofara.efa_lists import load_efa_lists
 from sofara.registry import load_all
 from sofara.report import main, report
 from sofara.reviews import load_reviews
@@ -19,6 +20,7 @@ def _real_db():
     load_cases(conn, RAW)
     load_commendations(conn, RAW)
     load_reviews(conn, RAW)
+    load_efa_lists(conn, RAW)
     return conn
 
 
@@ -29,6 +31,7 @@ def test_report_has_every_section():
         "## Case library",
         "## Match coverage",
         "## Official rulings",
+        "## EFA referee lists",
         "## Selection bias",
         "## Expert opinions",
         "## Open issues",

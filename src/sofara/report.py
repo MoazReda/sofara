@@ -18,6 +18,7 @@ from pathlib import Path
 from sofara.build import DEFAULT_RAW, apply_schema, connect
 from sofara.cases import load_cases
 from sofara.commendations import load_commendations
+from sofara.efa_lists import load_efa_lists
 from sofara.registry import DataError, load_all
 from sofara.reviews import load_reviews
 
@@ -72,6 +73,30 @@ def report(conn: sqlite3.Connection) -> str:
         "",
         f"Matches with a foreign official: {foreign_matches} — kept for the case library, "
         "left out of any analysis of Egyptian referees (decision 0014).",
+        "",
+    ]
+
+    # ---- official EFA lists ------------------------------------------------
+    lines += ["## EFA referee lists", ""]
+    lines += _table(
+        ["list", "names", "in our data", "season on the page"],
+        conn.execute("""SELECT list, COUNT(*), COUNT(official_id), MAX(season_label)
+                        FROM efa_lists GROUP BY list ORDER BY list"""),
+    )
+    unlisted = [
+        n
+        for (n,) in conn.execute("""
+            SELECT DISTINCT o.name_ar FROM match_officials mo JOIN officials o USING (official_id)
+            WHERE mo.role = 'referee' AND o.nationality = 'Egypt'
+              AND o.official_id NOT IN (SELECT official_id FROM efa_lists
+                                        WHERE official_id IS NOT NULL)
+            ORDER BY 1""")
+    ]
+    lines += [
+        "",
+        f"Egyptian centre referees in our crews on no EFA list: {len(unlisted)}"
+        + (f" ({', '.join(unlisted)})" if unlisted else "")
+        + " — the first-degree page may be out of date.",
         "",
     ]
 
@@ -238,6 +263,7 @@ def main(argv: list[str] | None = None) -> int:
             load_cases(conn, args.raw)
             load_commendations(conn, args.raw)
             load_reviews(conn, args.raw)
+            load_efa_lists(conn, args.raw)
         except DataError as e:
             print("Data does not build — run sofara-build to see the problems.")
             print(f"({len(e.problems)} problem(s))")
