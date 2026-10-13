@@ -286,6 +286,7 @@ def render(data: dict, fragment: bool = False) -> str:
     return (
         '<!doctype html>\n<html lang="ar" dir="rtl">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
+        '<meta name="robots" content="noindex, nofollow">\n'
         f"{head}</style>\n</head>\n<body>{body}</body>\n</html>\n"
     )
 
