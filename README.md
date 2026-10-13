@@ -24,7 +24,7 @@ committee's own data could add.
 | Key Match Incidents | **45** cases from those 19 matches, with on-field / post-VAR decisions; **20** with an official committee ruling |
 | Expert opinions | **52** from 14 sources (ex-referees, analysts, pundits, the committee as reported) |
 | Expert commendations | **14** "best of the round" picks (rounds 1, 2, 4), each verified against the crews |
-| Tests | 133, run in CI on Windows + Ubuntu, Python 3.10 + 3.13 |
+| Tests | 142, run in CI on Windows + Ubuntu, Python 3.10 + 3.13 |
 
 The crew data was independently confirmed: every official named in Nasser
 Abbas's round reviews matches our records (match and role).
@@ -36,7 +36,7 @@ Abbas's round reviews matches our records (match and role).
 - [x] Expert commendations ("best of the round"), verified against the crews
 - [~] **B. Case library** — 19 / 51 matches reviewed, 45 cases; Arabic search + video-quiz export done
 - [ ] **A. Appointment assistant** — needs match-level cards and penalties (see Known gaps)
-- [ ] **C. Expert-opinion analysis** — agreement between experts, by background
+- [~] **C. Expert-opinion analysis** — split score + Wilson range per case, grounds of each opinion, experts vs committee rulings ([decision 0016](docs/decisions/0016-measuring-expert-agreement.md)); by-background comparison waits for more data
 - [ ] **D. "What your data would add"** — clearly labelled mockups + methodology
 
 ## Quick start
@@ -101,6 +101,7 @@ src/sofara/          the package
   cases.py           loads the case library
   reviews.py         loads match reviews (coverage)
   efa_lists.py       loads the EFA's own referee lists (committee, international, first degree)
+  agreement.py       part ج: agreement measures + the grounds behind each opinion
   build.py           `sofara-build`
   report.py          `sofara-report`
   search.py          `sofara-search` + video-quiz export
@@ -113,7 +114,7 @@ tools/pull_bundle.bat  apply a commit bundle on Windows: pull → test → build
 
 ## Documentation
 
-- [Decision records](docs/decisions/README.md) — the 15 decisions that shape the project, and why
+- [Decision records](docs/decisions/README.md) — the 16 decisions that shape the project, and why
 - [Data dictionary](docs/data_dictionary.md) — every table, what one row means
 - [Sources](docs/SOURCES.md) — where every piece of data comes from
 

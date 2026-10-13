@@ -31,6 +31,8 @@ Roles: `referee`, `assistant_1`, `assistant_2`, `fourth`, `var`, `avar`,
 | `expert_commendations` | one expert naming one official as a best performer in one category (referee / assistant / var) in one round | `commendation_id`; match resolved from the crews | `commendations.csv` |
 | `match_reviews` | one source that went through the refereeing of one whole match (expert_review / press / match_review) | `review_id`; unique per match + source | `match_reviews.csv` |
 | `efa_lists` | one name on one official EFA list (main_committee / international / first_degree_referee) | (`list`, `name_ar`); `official_id` NULL when not one of our officials | `efa_lists.csv` |
+| `reason_codes` | one ground an expert can cite, with its kind (fact / threshold / law / var / process / consistency) | `code` | built into the schema |
+| `opinion_reasons` | one ground cited in one expert opinion | (`opinion_id`, `reason`) | `opinion_reasons.csv` (case_id, expert, reason) |
 
 - **Stages:** `on_field` (the referee) → `final` (after VAR; absent = unchanged) → `official` (published committee ruling, link required).
 - **Decision axes:** `offence` (none, foul, handball, offside, simulation, violent_conduct, goalkeeper_encroachment, other) · `offending_team_id` · `outcome` (play_on, penalty, free_kick, goal_awarded, goal_disallowed, penalty_retaken, corner, goal_kick, other).

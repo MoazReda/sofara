@@ -307,6 +307,43 @@ CREATE TABLE match_reviews (
 );
 
 -- ---------------------------------------------------------------------
+-- reason_codes: the grounds an expert gives for a view (part ج).
+-- `kind` says what the disagreement is about:
+--   fact        what happened (was there contact? was it deliberate?)
+--   threshold   how much is enough (light push or foul? yellow or red?)
+--   law         what a Law says (offside, encroachment, retake)
+--   var         what the VAR may or should do
+--   process     how the referee managed the moment
+--   consistency the same standard across matches
+-- ---------------------------------------------------------------------
+CREATE TABLE reason_codes (
+    code     TEXT PRIMARY KEY,
+    name_ar  TEXT NOT NULL,
+    kind     TEXT NOT NULL
+             CHECK (kind IN ('fact', 'threshold', 'law', 'var', 'process', 'consistency'))
+);
+
+INSERT INTO reason_codes (code, name_ar, kind) VALUES
+    ('contact_occurred',   'هل حدث احتكاك أو مخالفة أصلاً',      'fact'),
+    ('intent',             'القصد (متعمد أم لا)',                  'fact'),
+    ('simulation',         'ادعاء أو بحث عن السقوط',              'fact'),
+    ('ball_played',        'لعب الكرة أولاً',                      'fact'),
+    ('contact_impact',     'قوة الاحتكاك وتأثيره على اللعبة',      'threshold'),
+    ('hand_position',      'وضع اليد (طبيعي أم يكبّر حجم الجسم)',  'threshold'),
+    ('sanction_level',     'درجة العقوبة (إنذار، إنذار ثانٍ، طرد)', 'threshold'),
+    ('law_application',    'تطبيق نص في القانون',                  'law'),
+    ('var_protocol',       'حدود تدخل الـVAR',                     'var'),
+    ('referee_management', 'إدارة الحكم للعبة',                    'process'),
+    ('consistency',        'ثبات المعايير بين المباريات',          'consistency');
+
+-- one row = one ground cited in one opinion (an opinion can cite several)
+CREATE TABLE opinion_reasons (
+    opinion_id  INTEGER NOT NULL REFERENCES expert_opinions(opinion_id),
+    reason      TEXT    NOT NULL REFERENCES reason_codes(code),
+    PRIMARY KEY (opinion_id, reason)
+);
+
+-- ---------------------------------------------------------------------
 -- efa_lists: one row = one name on one official EFA list (the main
 -- Referees Committee, the international (FIFA) list, the first-degree
 -- referees). Lists include people outside our data (women's football,

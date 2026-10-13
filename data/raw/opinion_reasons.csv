@@ -1,0 +1,53 @@
+﻿case_id,expert,reason
+1,إبراهيم نور الدين,contact_occurred
+1,ناصر عباس,contact_occurred
+1,محمد عادل,contact_occurred
+1,محمد عادل,contact_impact
+1,جهاد جريشة,contact_impact
+1,جهاد جريشة,var_protocol
+1,مشعل العسعوسي,contact_occurred
+1,أحمد حسام ميدو,contact_occurred
+1,أحمد حسام ميدو,simulation
+1,محمد صلاح عبدالفتاح,contact_occurred
+3,جهاد جريشة,hand_position
+4,جهاد جريشة,contact_impact
+6,لجنة الحكام (بحسب الصحافة),ball_played
+7,لجنة الحكام (بحسب الصحافة),contact_impact
+8,مصدر بلجنة الحكام (غير مسمى),contact_occurred
+9,مصدر بلجنة الحكام (غير مسمى),contact_occurred
+10,مصدر بلجنة الحكام (غير مسمى),law_application
+11,محمد فاروق,contact_occurred
+15,ناصر عباس,sanction_level
+18,ناصر عباس,referee_management
+20,ناصر عباس,simulation
+22,ناصر عباس,law_application
+23,ناصر عباس,sanction_level
+23,ناصر عباس,var_protocol
+24,ناصر عباس,sanction_level
+8,ناصر عباس,sanction_level
+10,ناصر عباس,law_application
+11,ناصر عباس,sanction_level
+25,ناصر عباس,hand_position
+26,ناصر عباس,var_protocol
+27,ناصر عباس,var_protocol
+28,ناصر عباس,contact_impact
+29,ناصر عباس,sanction_level
+30,ناصر عباس,consistency
+30,ناصر عباس,var_protocol
+31,ناصر عباس,sanction_level
+32,ناصر عباس,hand_position
+33,ناصر عباس,contact_impact
+34,ناصر عباس,contact_impact
+34,مارك هالسي,simulation
+34,محمد عادل,contact_occurred
+34,محمد عادل,var_protocol
+34,ياسر عبد الرؤوف,contact_occurred
+35,ناصر عباس,ball_played
+36,ناصر عباس,intent
+36,مارك هالسي,intent
+37,مارك هالسي,simulation
+38,ياسر عبد الرؤوف,hand_position
+43,سامي هلهل,contact_impact
+43,سامي هلهل,var_protocol
+43,سامي هلهل,referee_management
+43,محمد فاروق,referee_management

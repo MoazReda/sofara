@@ -15,6 +15,13 @@ import sqlite3
 import sys
 from pathlib import Path
 
+from sofara.agreement import (
+    MIN_RULED,
+    case_agreement,
+    expert_vs_committee,
+    load_opinion_reasons,
+    reasons_by_side,
+)
 from sofara.build import DEFAULT_RAW, apply_schema, connect
 from sofara.cases import load_cases
 from sofara.commendations import load_commendations
@@ -186,6 +193,55 @@ def report(conn: sqlite3.Connection) -> str:
             GROUP BY 1 ORDER BY 3 DESC"""),
     )
 
+    # ---- agreement between experts (part ج, decision 0016) -----------------
+    lines += ["", "## Expert agreement", ""]
+    rows = []
+    for c in case_agreement(conn):
+        sides = reasons_by_side(conn, c.incident_id)
+        rng = f"{c.range[0]:.0%}–{c.range[1]:.0%}" if c.range else "-"
+        rows.append(
+            (
+                c.incident_id,
+                f"{c.agree}–{c.disagree}" + (f" (+{c.unclear} unclear)" if c.unclear else ""),
+                c.split if c.n >= 2 else "-",
+                rng if c.n >= 2 else "-",
+                c.label,
+                ", ".join(sides["agree"]) or "-",
+                ", ".join(sides["disagree"]) or "-",
+            )
+        )
+    lines += _table(
+        [
+            "case",
+            "right–wrong",
+            "split",
+            "share saying right (95%)",
+            "label",
+            "grounds: right",
+            "grounds: wrong",
+        ],
+        rows,
+    )
+    lines += [
+        "",
+        "Cases with 2+ independent expert opinions (committee excluded). "
+        "Fewer than 3 opinions = small_sample, no claim either way.",
+        "",
+        "### Experts and the committee's rulings",
+        "",
+    ]
+    lines += _table(
+        ["expert", "ruled cases with a view", "same view as the committee", "rate"],
+        [
+            (name, n, same, f"{same / n:.0%}" if n >= MIN_RULED else f"n < {MIN_RULED}")
+            for name, n, same in expert_vs_committee(conn)
+        ],
+    )
+    lines += [
+        "",
+        "Agreement with the committee, not accuracy: the committee can be wrong too.",
+    ]
+
     # ---- commendations (counts only: never a ranking of officials) ---------
     lines += ["", "## Expert commendations (counts per round, no names)", ""]
     lines += _table(
@@ -264,6 +320,7 @@ def main(argv: list[str] | None = None) -> int:
             load_commendations(conn, args.raw)
             load_reviews(conn, args.raw)
             load_efa_lists(conn, args.raw)
+            load_opinion_reasons(conn, args.raw)
         except DataError as e:
             print("Data does not build — run sofara-build to see the problems.")
             print(f"({len(e.problems)} problem(s))")
