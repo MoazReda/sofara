@@ -22,3 +22,4 @@ broke. Format: Context → Decision → Consequences.
 | [0014](0014-foreign-crews.md) | Foreign crews are recorded, never analysed as Egyptian referees |
 | [0015](0015-committee-round-videos-are-rulings.md) | The committee's own round videos are official rulings |
 | [0016](0016-measuring-expert-agreement.md) | How expert agreement is measured, and what it never claims |
+| [0017](0017-demo-is-one-static-page.md) | The demo is one static Arabic page, with search checked against Python |

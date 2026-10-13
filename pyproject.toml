@@ -20,12 +20,13 @@ sofara-build = "sofara.build:main"
 sofara-report = "sofara.report:main"
 sofara-search = "sofara.search:main"
 sofara-disputes = "sofara.disputes:main"
+sofara-site = "sofara.site:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-sofara = ["sql/*.sql"]
+sofara = ["sql/*.sql", "site/*.html", "site/*.js"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "src"]   # src: runs the doctest examples too

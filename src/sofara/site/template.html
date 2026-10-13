@@ -1,0 +1,416 @@
+<title>صفارة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Noto+Kufi+Arabic:wght@600;800&display=swap">
+<style>
+/* Layout: one reading column; a quiet header with the season's numbers, three tabs,
+   case "match sheets" whose spine is the decision chain pitch -> VAR -> committee. */
+:root {
+  --paper: #f3f5f1;      /* chalk-white with a grass tint */
+  --sheet: #ffffff;
+  --ink: #142019;
+  --muted: #59685f;
+  --line: #d6ded7;
+  --pitch: #1d6a44;      /* accent: pitch green */
+  --pitch-soft: #e1eee5;
+  --yellow: #e2b100;     /* card colours are semantic, never decoration */
+  --red: #c2392d;
+  --red-soft: #f7e3e0;
+  --amber-soft: #f6efd8;
+  --font-display: "Noto Kufi Arabic", "Segoe UI", Tahoma, sans-serif;
+  --font-body: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  --step-0: 1rem;
+  --step-1: 1.15rem;
+  --step-2: 1.45rem;
+  --step-3: clamp(1.9rem, 4vw, 2.6rem);
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0e1411; --sheet: #151d18; --ink: #e4ebe6; --muted: #92a399; --line: #27332c;
+    --pitch: #5cc08e; --pitch-soft: #173326; --yellow: #f0c94a; --red: #e7695d;
+    --red-soft: #3a1d1a; --amber-soft: #352d14; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0e1411; --sheet: #151d18; --ink: #e4ebe6; --muted: #92a399; --line: #27332c;
+  --pitch: #5cc08e; --pitch-soft: #173326; --yellow: #f0c94a; --red: #e7695d;
+  --red-soft: #3a1d1a; --amber-soft: #352d14; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--font-body); font-size: var(--step-0); line-height: 1.7;
+  padding-inline: 16px;
+}
+.wrap { max-width: 900px; margin-inline: auto; padding-block: 28px 64px; }
+a { color: var(--pitch); }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--pitch); outline-offset: 2px;
+}
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.35; text-wrap: balance; margin: 0; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* header */
+header.top { display: grid; gap: 14px; padding-block-end: 20px; border-block-end: 1px solid var(--line); }
+.brand { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.brand h1 { font-size: var(--step-3); font-weight: 800; letter-spacing: .01em; }
+.brand p { margin: 0; color: var(--muted); }
+.figures { display: flex; flex-wrap: wrap; gap: 8px 28px; margin: 0; }
+.figures div { display: grid; }
+.figures dt { color: var(--muted); font-size: .85rem; order: 2; }
+.figures dd { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: var(--step-2);
+  font-variant-numeric: tabular-nums; }
+
+/* tabs */
+nav.tabs { display: flex; gap: 4px; margin-block: 18px 22px; border-block-end: 1px solid var(--line); overflow-x: auto; }
+nav.tabs button {
+  font: 600 var(--step-0) var(--font-body); color: var(--muted); background: none; border: 0;
+  padding: 10px 14px; cursor: pointer; border-block-end: 3px solid transparent; white-space: nowrap;
+}
+nav.tabs button[aria-selected="true"] { color: var(--ink); border-block-end-color: var(--pitch); }
+
+/* search */
+.search { display: grid; gap: 10px; }
+.search input[type="search"] {
+  width: 100%; font: 500 var(--step-1) var(--font-body); color: var(--ink);
+  background: var(--sheet); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px;
+}
+.filters { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; color: var(--muted); font-size: .92rem; }
+.filters select { font: inherit; color: var(--ink); background: var(--sheet); border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; }
+.filters label { display: inline-flex; gap: 6px; align-items: center; }
+.examples { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; color: var(--muted); font-size: .9rem; }
+.examples button {
+  font: 500 .9rem var(--font-body); color: var(--pitch); background: var(--pitch-soft);
+  border: 0; border-radius: 999px; padding: 3px 12px; cursor: pointer;
+}
+.count { color: var(--muted); margin-block: 16px 8px; font-size: .95rem; }
+
+/* case sheet */
+.cases { display: grid; gap: 14px; }
+article.case { background: var(--sheet); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; display: grid; gap: 10px; min-width: 0; }
+.case-head { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; justify-content: space-between; }
+.case-head h3 { font-size: var(--step-1); font-weight: 600; }
+.meta { color: var(--muted); font-size: .9rem; }
+.case p.desc { margin: 0; }
+.pill { font-size: .82rem; font-weight: 600; padding: 2px 10px; border-radius: 999px; white-space: nowrap; }
+.pill.ok { background: var(--pitch-soft); color: var(--pitch); }
+.pill.bad { background: var(--red-soft); color: var(--red); }
+.pill.open { background: var(--amber-soft); color: var(--ink); }
+
+.chain { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.chain li { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; display: grid; gap: 2px; min-width: 0; }
+.chain li.official { border-color: var(--pitch); }
+.chain li.missing { border-style: dashed; color: var(--muted); }
+.chain .stage { font-size: .78rem; color: var(--muted); letter-spacing: .02em; }
+.chain .what { font-weight: 600; }
+.card-chip { display: inline-flex; align-items: center; gap: 6px; font-size: .85rem; }
+.card-chip i { width: 10px; height: 14px; border-radius: 2px; display: inline-block; background: var(--yellow); }
+.card-chip.red i, .card-chip.second_yellow i { background: var(--red); }
+
+.links { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .9rem; }
+.why { display: flex; flex-wrap: wrap; gap: 6px; }
+.why span { font-size: .8rem; background: var(--pitch-soft); color: var(--pitch); border-radius: 6px; padding: 1px 8px; }
+
+details.ops summary { cursor: pointer; font-weight: 600; color: var(--pitch); }
+.op { border-block-start: 1px solid var(--line); padding-block: 10px; display: grid; gap: 4px; }
+.op-head { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.op-head b { font-weight: 600; }
+.stance { font-size: .8rem; font-weight: 600; border-radius: 6px; padding: 0 8px; }
+.stance.agree { background: var(--pitch-soft); color: var(--pitch); }
+.stance.disagree { background: var(--red-soft); color: var(--red); }
+.stance.unclear { background: var(--amber-soft); color: var(--ink); }
+.grounds { display: flex; flex-wrap: wrap; gap: 4px; }
+.grounds span { font-size: .78rem; border: 1px solid var(--line); border-radius: 6px; padding: 0 6px; color: var(--muted); }
+
+/* disputes */
+.lead { color: var(--muted); max-width: 65ch; }
+.dispute { display: grid; gap: 12px; }
+.split { display: grid; gap: 6px; }
+.bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--line); }
+.bar .a { background: var(--pitch); }
+.bar .d { background: var(--red); }
+.sides { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.side { min-width: 0; }
+.side h4 { margin: 0 0 4px; font-size: .95rem; }
+.compare-wrap { overflow-x: auto; }
+table.compare { border-collapse: collapse; width: 100%; min-width: 460px; font-size: .95rem; }
+table.compare th, table.compare td { text-align: start; padding: 8px 10px; border-block-end: 1px solid var(--line); vertical-align: top; }
+table.compare th { color: var(--muted); font-weight: 500; }
+
+/* method */
+.prose { max-width: 65ch; display: grid; gap: 18px; }
+.prose h2 { font-size: var(--step-2); }
+.prose ul { margin: 0; padding-inline-start: 1.2em; display: grid; gap: 6px; }
+.prose p { margin: 0; }
+footer { margin-block-start: 40px; color: var(--muted); font-size: .85rem; border-block-start: 1px solid var(--line); padding-block-start: 14px; }
+@media (prefers-reduced-motion: no-preference) { article.case { transition: border-color .15s; } article.case:hover { border-color: var(--muted); } }
+</style>
+
+<div class="wrap" dir="rtl" lang="ar">
+  <header class="top">
+    <div class="brand">
+      <h1>صفارة</h1>
+      <p id="season-line">قرارات التحكيم في الدوري المصري الممتاز، موسم 2026/27</p>
+    </div>
+    <dl class="figures" id="figures"></dl>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="أقسام الصفحة">
+    <button role="tab" id="tab-cases" aria-controls="cases" aria-selected="true">مكتبة الحالات</button>
+    <button role="tab" id="tab-disputes" aria-controls="disputes" aria-selected="false">أين يختلف الخبراء</button>
+    <button role="tab" id="tab-method" aria-controls="method" aria-selected="false">كيف بُنيت البيانات</button>
+  </nav>
+
+  <section id="cases" role="tabpanel" aria-labelledby="tab-cases">
+    <div class="search">
+      <label for="q" class="meta">ابحث بالكلام العادي، مثل «بلنتي» أو «هاند» أو اسم فريق أو حكم</label>
+      <input type="search" id="q" autocomplete="off" placeholder="مثلاً: الأهلي بلنتي">
+      <div class="examples" id="examples"><span>جرّب:</span></div>
+      <div class="filters">
+        <label for="round">الجولة <select id="round"><option value="">كل الجولات</option></select></label>
+        <label for="status">الحكم الرسمي
+          <select id="status">
+            <option value="">الكل</option>
+            <option value="ruled">صدر فيها حكم من اللجنة</option>
+            <option value="controversial">بلا حكم منشور</option>
+          </select>
+        </label>
+        <label for="varchg"><input type="checkbox" id="varchg"> الـVAR غيّر القرار</label>
+      </div>
+    </div>
+    <p class="count num" id="count" aria-live="polite"></p>
+    <div class="cases" id="case-list"></div>
+  </section>
+
+  <section id="disputes" role="tabpanel" aria-labelledby="tab-disputes" hidden>
+    <p class="lead">الحالات التي علّق عليها خبيران مستقلان أو أكثر ولم يتفقوا. لجنة الحكام لا تُحسب ضمن الخبراء، وحكمها المنشور يظهر في سلسلة القرارات. مع أقل من ثلاثة آراء لا نصف الحالة بأنها جدلية أو محسومة.</p>
+    <div class="cases" id="dispute-list"></div>
+    <div id="comparisons"></div>
+  </section>
+
+  <section id="method" role="tabpanel" aria-labelledby="tab-method" hidden>
+    <div class="prose" id="method-body"></div>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+/*__SEARCH_JS__*/
+</script>
+<script>
+const DATA = /*__DATA__*/null;
+const S = DATA.stats;
+const byId = new Map(DATA.cases.map((c) => [c.id, c]));
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+const ar = (n) => Number(n).toLocaleString("ar-EG");
+const pct = (x) => `${ar(Math.round(x * 100))}٪`;
+
+function figures() {
+  const items = [
+    [S.cases, "حالة موثّقة"],
+    [`${ar(S.reviewed)} من ${ar(S.matches)}`, "مباراة رُوجعت"],
+    [S.ruled, "حالة لها حكم من لجنة الحكام"],
+    [S.opinions, "رأي خبير"],
+  ];
+  $("figures").innerHTML = items
+    .map(([v, l]) => `<div><dt>${l}</dt><dd>${typeof v === "number" ? ar(v) : v}</dd></div>`)
+    .join("");
+}
+
+function minuteText(c) {
+  if (c.minute == null) return "";
+  return ` · الدقيقة ${ar(c.minute)}${c.added ? "+" + ar(c.added) : ""}`;
+}
+
+function statusPill(c) {
+  if (c.status !== "ruled") return `<span class="pill open">بلا حكم منشور</span>`;
+  const call = c.call_verdict === "correct";
+  const card = c.card_verdict === "correct";
+  if (call && card) return `<span class="pill ok">اللجنة: القرار صحيح</span>`;
+  if (call) return `<span class="pill bad">اللجنة: القرار صحيح والبطاقة خطأ</span>`;
+  return `<span class="pill bad">اللجنة: القرار خطأ</span>`;
+}
+
+function cardsHtml(cards) {
+  const names = { yellow: "إنذار", second_yellow: "إنذار ثانٍ", red: "طرد" };
+  return cards
+    .map((k) => `<span class="card-chip ${k.sanction}"><i aria-hidden="true"></i>${names[k.sanction]}: ${esc(k.person)}</span>`)
+    .join(" ");
+}
+
+function chain(c) {
+  const items = c.stages.map((s) => {
+    let what = esc(s.decision);
+    if (s.stage === "final") what = `غيّر القرار: ${what}`;
+    return `<li class="${s.stage === "official" ? "official" : ""}"><span class="stage">${s.label}</span>
+      <span class="what">${what}</span>${s.cards.length ? cardsHtml(s.cards) : ""}</li>`;
+  });
+  if (!c.stages.some((s) => s.stage === "final")) {
+    items.splice(1, 0, `<li><span class="stage">الـVAR</span><span class="what">${esc(c.var_review_ar)}</span></li>`);
+  }
+  if (c.status !== "ruled") {
+    items.push(`<li class="missing"><span class="stage">حكم لجنة الحكام</span><span class="what">لم يُنشر</span></li>`);
+  }
+  return `<ol class="chain">${items.join("")}</ol>`;
+}
+
+function opinionsHtml(c, open) {
+  if (!c.opinions.length) return "";
+  const rows = c.opinions.map((o) => `
+    <div class="op">
+      <div class="op-head"><b>${esc(o.expert)}</b><span class="meta">${esc(o.background || (o.committee ? "لجنة الحكام عبر الصحافة" : ""))}</span>
+        <span class="stance ${o.stance}">${o.stance_ar}</span></div>
+      <div>${esc(o.summary)}</div>
+      ${o.grounds.length ? `<div class="grounds">${o.grounds.map((g) => `<span>${esc(g)}</span>`).join("")}</div>` : ""}
+      <a class="meta" href="${esc(o.url)}" target="_blank" rel="noopener">${esc(o.source)} ↗</a>
+    </div>`);
+  return `<details class="ops"${open ? " open" : ""}><summary>آراء الخبراء (${ar(c.opinions.length)})</summary>${rows.join("")}</details>`;
+}
+
+function caseHtml(c, why = [], openOps = false) {
+  const links = [
+    c.video_url ? `<a href="${esc(c.video_url)}" target="_blank" rel="noopener">الفيديو ↗</a>` : "",
+    `<a href="${esc(c.source_url)}" target="_blank" rel="noopener">مصدر الوقائع ↗</a>`,
+    c.ruling_url ? `<a href="${esc(c.ruling_url)}" target="_blank" rel="noopener">فيديو لجنة الحكام ↗</a>` : "",
+  ].filter(Boolean).join("");
+  return `<article class="case" id="case-${c.id}">
+    <div class="case-head"><h3>${esc(c.home)} × ${esc(c.away)}</h3>${statusPill(c)}</div>
+    <div class="meta num">حالة ${ar(c.id)} · الجولة ${ar(c.round)}${minuteText(c)} · الحكم: ${esc(c.referee)}${c.foreign_crew ? " (طاقم أجنبي)" : ""}</div>
+    <p class="desc">${esc(c.description)}</p>
+    ${chain(c)}
+    ${why.length ? `<div class="why">${why.map((w) => `<span>${esc(w)}</span>`).join("")}</div>` : ""}
+    <div class="links">${links}</div>
+    ${opinionsHtml(c, openOps)}
+  </article>`;
+}
+
+function renderCases() {
+  const text = $("q").value.trim();
+  const round = Number($("round").value) || null;
+  const status = $("status").value;
+  const varChanged = $("varchg").checked;
+  let list;
+  if (text) {
+    list = runSearch(text, DATA.cases, DATA.index, { round, varChanged }).results;
+  } else {
+    list = DATA.cases
+      .filter((c) => (!round || c.round === round) && (!varChanged || c.var_changed))
+      .sort((a, b) => a.round - b.round || (a.minute ?? 999) - (b.minute ?? 999) || a.id - b.id)
+      .map((c) => ({ case: c, why: [] }));
+  }
+  if (status) list = list.filter((r) => r.case.status === status);
+  $("count").textContent = list.length
+    ? `${ar(list.length)} حالة`
+    : "لا توجد حالات تطابق البحث. جرّب كلمة أقصر أو أزل أحد الفلاتر.";
+  $("case-list").innerHTML = list.map((r) => caseHtml(r.case, r.why)).join("");
+}
+
+function renderDisputes() {
+  $("dispute-list").innerHTML = DATA.disputes.map((d) => {
+    const c = byId.get(d.id);
+    const side = (stance, title) => {
+      const ops = c.opinions.filter((o) => o.stance === stance && !o.committee);
+      const g = d.grounds[stance];
+      return `<div class="side"><h4>${title} (${ar(ops.length)})</h4>
+        <div class="meta">يستندون إلى: ${g.length ? g.map(esc).join("، ") : "لم يذكروا أسباباً"}</div>
+        ${ops.map((o) => `<div class="op"><div class="op-head"><b>${esc(o.expert)}</b><span class="meta">${esc(o.background)}</span></div>
+          <div>${esc(o.summary)}</div><a class="meta" href="${esc(o.url)}" target="_blank" rel="noopener">${esc(o.source)} ↗</a></div>`).join("")}</div>`;
+    };
+    const total = d.agree + d.disagree;
+    return `<article class="case dispute">
+      <div class="case-head"><h3>${esc(c.home)} × ${esc(c.away)}</h3><span class="pill ${d.label === "contested" ? "bad" : "open"}">${d.label_ar}</span></div>
+      <div class="meta num">حالة ${ar(c.id)} · الجولة ${ar(c.round)}${minuteText(c)} · الحكم: ${esc(c.referee)}${c.foreign_crew ? " (طاقم أجنبي)" : ""}</div>
+      <p class="desc">${esc(c.description)}</p>
+      ${chain(c)}
+      <div class="split">
+        <div class="bar" role="img" aria-label="${ar(d.agree)} يرون القرار صحيحاً و${ar(d.disagree)} يرونه خطأ">
+          <span class="a" style="width:${(d.agree / total) * 100}%"></span><span class="d" style="width:${(d.disagree / total) * 100}%"></span></div>
+        <div class="meta num">${ar(d.agree)} يرون القرار صحيحاً و${ar(d.disagree)} يرونه خطأ. مع هذا العدد من الآراء، نسبة من يرونه صحيحاً بين ${pct(d.low)} و${pct(d.high)} بثقة ٩٥٪.</div>
+      </div>
+      <div class="sides">${side("agree", "يرون القرار صحيحاً")}${side("disagree", "يرون القرار خطأ")}</div>
+    </article>`;
+  }).join("");
+
+  if (!DATA.comparisons.length) return;
+  const row = (label, f) => `<tr><th scope="row">${label}</th>${f}</tr>`;
+  const stageText = (c, stage) => {
+    const s = c.stages.find((x) => x.stage === stage);
+    if (!s) return stage === "official" ? "لم يُنشر" : "—";
+    return esc(s.decision) + (s.cards.length ? " · " + cardsHtml(s.cards) : "");
+  };
+  $("comparisons").innerHTML = `<h2 style="font-size:var(--step-2);margin-block:28px 6px">ثبات المعايير</h2>
+    <p class="lead">حالات قال خبير إنها متماثلة وتستحق القرار نفسه. نعرضها متجاورة كما هي.</p>` +
+    DATA.comparisons.map((p) => {
+      const a = byId.get(p.a), b = byId.get(p.b);
+      const cell = (c, f) => `<td>${f(c)}</td>`;
+      return `<article class="case"><p class="desc"><b>${esc(p.expert)}:</b> ${esc(p.note)} <a href="${esc(p.url)}" target="_blank" rel="noopener">المصدر ↗</a></p>
+        <div class="compare-wrap"><table class="compare">
+          <thead><tr><th></th><th scope="col">حالة ${ar(a.id)}</th><th scope="col">حالة ${ar(b.id)}</th></tr></thead>
+          <tbody>
+            ${row("المباراة", cell(a, (c) => `الجولة ${ar(c.round)}: ${esc(c.home)} × ${esc(c.away)}`) + cell(b, (c) => `الجولة ${ar(c.round)}: ${esc(c.home)} × ${esc(c.away)}`))}
+            ${row("الحكم", cell(a, (c) => esc(c.referee)) + cell(b, (c) => esc(c.referee)))}
+            ${row("قرار الحكم في الملعب", cell(a, (c) => stageText(c, "on_field")) + cell(b, (c) => stageText(c, "on_field")))}
+            ${row("حكم لجنة الحكام", cell(a, (c) => stageText(c, "official")) + cell(b, (c) => stageText(c, "official")))}
+          </tbody></table></div></article>`;
+    }).join("");
+}
+
+function renderMethod() {
+  const bias = S.bias.map((b) => `${esc(b.team)} في ${pct(b.share)} من الحالات`).join("، ");
+  $("method-body").innerHTML = `
+    <section><h2>من أين جاءت البيانات</h2><ul>
+      <li>أطقم التحكيم من بطاقات الاتحاد المصري لكرة القدم الرسمية: ${ar(S.matches)} مباراة و${ar(S.officials)} حكماً حتى الجولة ${ar(S.rounds)}.</li>
+      <li>الحالات من الصحافة الرياضية ومن مراجعات حكام سابقين علنية، وكل حالة تحمل مصدرها.</li>
+      <li>حكم لجنة الحكام مأخوذ فقط مما نشرته اللجنة بنفسها، وهو فيديو تحليل الحالات بعد كل جولة.</li>
+      <li>آراء الخبراء ملخصة بكلماتنا مع رابط المصدر. لا ننسخ نصوص المقالات، والفيديوهات روابط فقط.</li>
+    </ul></section>
+    <section><h2>ما لا تقوله هذه البيانات</h2><ul>
+      <li>لا نحكم على أي قرار من عندنا. الحالة بلا حكم منشور تبقى «بلا حكم».</li>
+      <li>الأرقام هنا ليست نسبة أخطاء لأي حكم: الحالات اختيرت لأنها أثارت الجدل، لا عشوائياً.</li>
+      <li>لا نرتّب الحكام ولا الخبراء من الأفضل للأسوأ.</li>
+      <li>الحكام الأجانب يظهرون في مكتبة الحالات، ولا يدخلون في أي تحليل عن الحكم المصري.</li>
+    </ul></section>
+    <section><h2>حدود ما جمعناه</h2>
+      <p>رُوجعت ${ar(S.reviewed)} مباراة من ${ar(S.matches)} حتى الآن. التغطية تميل للفرق الأكثر جماهيرية: ${bias}. لذلك نعرض دائماً عدد الآراء بجانب أي نسبة، ولا نصف حالة بأنها جدلية بأقل من ثلاثة آراء.</p>
+    </section>
+    <section><h2>ما يمكن أن تضيفه بيانات اللجنة</h2>
+      <p>تقارير المقيّمين وسجلات غرفة الفيديو غير منشورة، ولذلك لا يقيس هذا المشروع دقة أي حكم. بهذه البيانات يمكن قياس الدقة فعلاً ومتابعة تطور كل حكم بمرور الموسم، داخل اللجنة وبما يخدم التطوير.</p>
+    </section>
+    <p class="meta">الكود والبيانات ومنهجية كل قرار في <a href="${esc(DATA.repo)}" target="_blank" rel="noopener">المستودع على GitHub ↗</a>.</p>`;
+  $("foot").innerHTML = `صفارة · مشروع مستقل غير تابع للاتحاد المصري لكرة القدم · بيانات حتى ${esc(S.built)}`;
+}
+
+function setupFilters() {
+  for (const r of DATA.rounds) $("round").insertAdjacentHTML("beforeend", `<option value="${r}">الجولة ${ar(r)}</option>`);
+  for (const ex of ["بلنتي", "هاند", "راح الشاشة", "الأهلي بلنتي", "طرد", "تسلل"]) {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = ex;
+    b.addEventListener("click", () => { $("q").value = ex; renderCases(); });
+    $("examples").append(b);
+  }
+  ["q", "round", "status", "varchg"].forEach((id) => $(id).addEventListener("input", renderCases));
+}
+
+const TABS = ["cases", "disputes", "method"];
+function show(tab) {
+  if (!TABS.includes(tab)) tab = "cases";
+  for (const t of TABS) {
+    $(t).hidden = t !== tab;
+    $(`tab-${t}`).setAttribute("aria-selected", String(t === tab));
+  }
+  try { localStorage.setItem("sofara-tab", tab); } catch (e) {}
+}
+TABS.forEach((t) => $(`tab-${t}`).addEventListener("click", () => show(t)));
+
+figures();
+setupFilters();
+renderCases();
+renderDisputes();
+renderMethod();
+let start = location.hash.replace("#", "");
+if (!TABS.includes(start)) { try { start = localStorage.getItem("sofara-tab") || "cases"; } catch (e) { start = "cases"; } }
+show(start);
+</script>

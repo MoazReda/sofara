@@ -9,3 +9,4 @@ data/sources/
 .ruff_cache/
 build/
 dist/
+/site/

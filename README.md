@@ -24,7 +24,7 @@ committee's own data could add.
 | Key Match Incidents | **45** cases from those 19 matches, with on-field / post-VAR decisions; **20** with an official committee ruling |
 | Expert opinions | **52** from 14 sources (ex-referees, analysts, pundits, the committee as reported) |
 | Expert commendations | **14** "best of the round" picks (rounds 1, 2, 4), each verified against the crews |
-| Tests | 147, run in CI on Windows + Ubuntu, Python 3.10 + 3.13 |
+| Tests | 152, run in CI on Windows + Ubuntu, Python 3.10 + 3.13 |
 
 The crew data was independently confirmed: every official named in Nasser
 Abbas's round reviews matches our records (match and role).
@@ -37,6 +37,7 @@ Abbas's round reviews matches our records (match and role).
 - [~] **B. Case library** — 19 / 51 matches reviewed, 45 cases; Arabic search + video-quiz export done
 - [ ] **A. Appointment assistant** — needs match-level cards and penalties (see Known gaps)
 - [~] **C. Expert-opinion analysis** — split score + Wilson range per case, grounds of each opinion, experts vs committee rulings ([decision 0016](docs/decisions/0016-measuring-expert-agreement.md)); by-background comparison waits for more data
+- [~] **Demo page** (`sofara-site`) — case library, disagreements, methodology
 - [ ] **D. "What your data would add"** — clearly labelled mockups + methodology
 
 ## Quick start
@@ -63,6 +64,15 @@ sofara-search "هاند" --round 2
 sofara-search "الأهلي بلنتي"                # team names and referee names act as filters
 sofara-search "راح الشاشة" --quiz quiz.md  # video quiz: question first, answer folded away
 ```
+
+### The demo page
+
+```bash
+sofara-site                                # writes site/index.html: one Arabic page, no server
+```
+
+The case library with the same search, where experts disagree, and how the
+data was made. It works offline ([decision 0017](docs/decisions/0017-demo-is-one-static-page.md)).
 
 ### Where experts disagree
 
@@ -110,6 +120,7 @@ src/sofara/          the package
   efa_lists.py       loads the EFA's own referee lists (committee, international, first degree)
   agreement.py       part ج: agreement measures + the grounds behind each opinion
   disputes.py        `sofara-disputes`: the Arabic page of disagreements
+  site.py, site/     `sofara-site`: the demo page (template + search.js)
   build.py           `sofara-build`
   report.py          `sofara-report`
   search.py          `sofara-search` + video-quiz export
@@ -122,7 +133,7 @@ tools/pull_bundle.bat  apply a commit bundle on Windows: pull → test → build
 
 ## Documentation
 
-- [Decision records](docs/decisions/README.md) — the 16 decisions that shape the project, and why
+- [Decision records](docs/decisions/README.md) — the 17 decisions that shape the project, and why
 - [Data dictionary](docs/data_dictionary.md) — every table, what one row means
 - [Sources](docs/SOURCES.md) — where every piece of data comes from
 
