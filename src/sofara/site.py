@@ -34,6 +34,7 @@ from sofara.cases import load_cases
 from sofara.commendations import load_commendations
 from sofara.disputes import BACKGROUND_AR, KIND_AR, LABEL_AR, STAGE_AR, STANCE_AR
 from sofara.efa_lists import load_efa_lists
+from sofara.mockups import mockups
 from sofara.registry import DataError, load_all
 from sofara.reviews import load_reviews
 from sofara.search import (
@@ -265,6 +266,7 @@ def build_data(conn: sqlite3.Connection, vocab_path: Path = DEFAULT_VOCAB) -> di
         "stats": stats,
         "rounds": sorted({c["round"] for c in cases}),
         "repo": REPO_URL,
+        "mock": mockups(),
     }
 
 

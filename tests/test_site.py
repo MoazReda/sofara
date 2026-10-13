@@ -91,3 +91,15 @@ def test_cli_writes_page(tmp_path):
     out = tmp_path / "index.html"
     assert main(["--raw", str(RAW), "--out", str(out)]) == 0
     assert "صفارة" in out.read_text(encoding="utf-8")
+
+
+def test_mockups_use_no_real_name(conn, data):
+    mock = json.dumps(data["mock"], ensure_ascii=False)
+    for (name,) in conn.execute("SELECT name_ar FROM officials UNION SELECT name_ar FROM teams"):
+        assert name not in mock, f"real name in the mockups: {name}"
+
+
+def test_mockup_tab_is_labelled_as_synthetic(data):
+    page = render(data)
+    assert "بيانات تجريبية بأسماء وهمية" in page
+    assert page.count("مثال توضيحي") >= 3

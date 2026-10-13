@@ -143,6 +143,40 @@ table.compare th { color: var(--muted); font-weight: 500; }
 .prose h2 { font-size: var(--step-2); }
 .prose ul { margin: 0; padding-inline-start: 1.2em; display: grid; gap: 6px; }
 .prose p { margin: 0; }
+
+/* part D: mockups */
+.mock-banner { border: 2px dashed var(--yellow); background: var(--amber-soft); border-radius: var(--radius);
+  padding: 12px 14px; display: grid; gap: 4px; }
+.mock-banner b { font-family: var(--font-display); font-weight: 600; }
+.mock { display: grid; gap: 14px; }
+.mock > *, .mock-card > *, article.case > * { min-width: 0; }
+.mock-card { background: var(--sheet); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; display: grid; gap: 12px; min-width: 0; }
+.mock-card h2 { font-size: var(--step-1); font-weight: 600; }
+.stamp { font-size: .75rem; font-weight: 600; color: var(--ink); background: var(--amber-soft); border: 1px dashed var(--yellow);
+  border-radius: 6px; padding: 0 8px; white-space: nowrap; }
+.needs { font-size: .88rem; color: var(--muted); border-block-start: 1px solid var(--line); padding-block-start: 8px; }
+.chart { overflow-x: auto; }
+.chart svg { display: block; width: 100%; height: auto; min-width: 420px; }
+.chart text { fill: var(--muted); font: 12px var(--font-body); }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .series { stroke: var(--pitch); stroke-width: 2; fill: none; }
+.chart .dot { fill: var(--pitch); stroke: var(--sheet); stroke-width: 2; }
+.chart .mark-bar { fill: var(--pitch); }
+.chart .hit { fill: transparent; cursor: default; }
+
+.tiles { display: flex; flex-wrap: wrap; gap: 8px 28px; }
+.tiles div { display: grid; }
+.tiles dt { color: var(--muted); font-size: .85rem; order: 2; }
+.tiles dd { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: var(--step-2); font-variant-numeric: tabular-nums; }
+.fixtures { display: flex; flex-wrap: wrap; gap: 8px; }
+.fixtures label { display: inline-flex; gap: 6px; align-items: center; border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.fixtures input:checked + span { font-weight: 600; color: var(--pitch); }
+table.cands { border-collapse: collapse; width: 100%; min-width: 560px; font-size: .93rem; }
+table.cands th, table.cands td { text-align: start; padding: 8px 10px; border-block-end: 1px solid var(--line); vertical-align: top; }
+table.cands th { color: var(--muted); font-weight: 500; }
+table.cands tr.out td { color: var(--muted); }
+.tip { position: fixed; z-index: 10; pointer-events: none; background: var(--ink); color: var(--paper);
+  font-size: .85rem; padding: 4px 8px; border-radius: 6px; white-space: nowrap; }
 footer { margin-block-start: 40px; color: var(--muted); font-size: .85rem; border-block-start: 1px solid var(--line); padding-block-start: 14px; }
 @media (prefers-reduced-motion: no-preference) { article.case { transition: border-color .15s; } article.case:hover { border-color: var(--muted); } }
 </style>
@@ -160,6 +194,7 @@ footer { margin-block-start: 40px; color: var(--muted); font-size: .85rem; borde
     <button role="tab" id="tab-cases" aria-controls="cases" aria-selected="true">مكتبة الحالات</button>
     <button role="tab" id="tab-disputes" aria-controls="disputes" aria-selected="false">أين يختلف الخبراء</button>
     <button role="tab" id="tab-method" aria-controls="method" aria-selected="false">كيف بُنيت البيانات</button>
+    <button role="tab" id="tab-mock" aria-controls="mock" aria-selected="false">ماذا تضيف بيانات اللجنة</button>
   </nav>
 
   <section id="cases" role="tabpanel" aria-labelledby="tab-cases">
@@ -191,6 +226,16 @@ footer { margin-block-start: 40px; color: var(--muted); font-size: .85rem; borde
 
   <section id="method" role="tabpanel" aria-labelledby="tab-method" hidden>
     <div class="prose" id="method-body"></div>
+  </section>
+
+  <section id="mock" role="tabpanel" aria-labelledby="tab-mock" hidden>
+    <div class="mock">
+      <div class="mock-banner" role="note">
+        <b>بيانات تجريبية بأسماء وهمية</b>
+        <span>كل الأرقام والأسماء في هذا القسم مصطنعة للتوضيح فقط، ولا تخص أي حكم أو فريق حقيقي. الغرض أن نرى ما يمكن بناؤه لو أتيحت بيانات لجنة الحكام غير المنشورة.</span>
+      </div>
+      <div id="mock-body" class="mock"></div>
+    </div>
   </section>
 
   <footer id="foot"></footer>
@@ -394,7 +439,133 @@ function setupFilters() {
   ["q", "round", "status", "varchg"].forEach((id) => $(id).addEventListener("input", renderCases));
 }
 
-const TABS = ["cases", "disputes", "method"];
+
+// ---- part D: mockups (synthetic data, invented names) ----
+const M = DATA.mock;
+const tip = document.createElement("div");
+tip.className = "tip"; tip.hidden = true; document.body.append(tip);
+function bindTips(root) {
+  root.querySelectorAll("[data-tip]").forEach((el) => {
+    el.addEventListener("pointermove", (e) => {
+      tip.textContent = el.dataset.tip; tip.hidden = false;
+      tip.style.left = `${Math.min(e.clientX + 12, innerWidth - tip.offsetWidth - 8)}px`;
+      tip.style.top = `${e.clientY - 34}px`;
+    });
+    el.addEventListener("pointerleave", () => { tip.hidden = true; });
+  });
+}
+
+function progressChart() {
+  const pts = M.progress.marks;
+  const W = 640, H = 240, L = 40, R = 16, T = 16, B = 36;
+  const x = (i) => L + (i * (W - L - R)) / (pts.length - 1);
+  const y = (v) => T + ((10 - v) * (H - T - B)) / 4; // scale 6..10
+  const grid = [6, 7, 8, 9, 10].map((v) =>
+    `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${ar(v)}</text>`).join("");
+  const line = pts.map((p, i) => `${i ? "L" : "M"}${x(i)},${y(p.mark)}`).join("");
+  const xl = pts.map((p, i) => (i % 2 === 0 || i === pts.length - 1)
+    ? `<text x="${x(i)}" y="${H - 14}" text-anchor="middle">${ar(p.match)}</text>` : "").join("");
+  const dots = pts.map((p, i) => `<circle class="dot" cx="${x(i)}" cy="${y(p.mark)}" r="5"/>
+    <circle class="hit" cx="${x(i)}" cy="${y(p.mark)}" r="14" data-tip="مباراة ${ar(p.match)} · درجة ${ar(p.mark)} · صعوبة ${({ high: "مرتفعة", medium: "متوسطة", low: "منخفضة" })[p.difficulty]}"/>`).join("");
+  const last = pts[pts.length - 1];
+  return `<svg viewBox="0 0 ${W} ${H}" direction="ltr" role="img" aria-label="درجات تقييم الحكم أ في ${ar(pts.length)} مباراة، من ${ar(pts[0].mark)} إلى ${ar(last.mark)}">
+    ${grid}<path class="series" d="${line}"/>${dots}${xl}
+    <text x="${x(pts.length - 1) - 8}" y="${y(last.mark) - 12}" text-anchor="end" style="fill:var(--ink);font-weight:600">${ar(last.mark)}</text>
+    <text x="${(L + W - R) / 2}" y="${H - 1}" text-anchor="middle">رقم المباراة في الموسم</text></svg>`;
+}
+
+function errorBars() {
+  const rows = M.progress.errors, max = Math.max(...rows.map((r) => r.count));
+  const W = 640, rowH = 34, H = rows.length * rowH + 8, L = 200, R = 40;
+  const bars = rows.map((r, i) => {
+    const w = ((W - L - R) * r.count) / max, yy = 8 + i * rowH;
+    return `<text x="${L - 10}" y="${yy + 17}" text-anchor="end" style="fill:var(--ink)">${esc(r.type)}</text>
+      <rect class="mark-bar" x="${L}" y="${yy + 4}" width="${w}" height="18" rx="4"/>
+      <text x="${L + w + 8}" y="${yy + 17}">${ar(r.count)}</text>
+      <rect class="hit" x="${L}" y="${yy}" width="${W - L - R}" height="${rowH - 4}" data-tip="${esc(r.type)}: ${ar(r.count)} ملاحظات"/>`;
+  }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" direction="ltr" role="img" aria-label="أكثر ملاحظات المقيّمين تكراراً للحكم أ">${bars}</svg>`;
+}
+
+function varHistogram() {
+  const bins = M.var_room.bins, max = Math.max(...bins.map((b) => b.count));
+  const W = 640, H = 220, L = 34, R = 10, T = 12, B = 40;
+  const bw = (W - L - R) / bins.length;
+  const y = (v) => T + (H - T - B) * (1 - v / max);
+  const ticks = [0, Math.round(max / 2), max].map((v) =>
+    `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${ar(v)}</text>`).join("");
+  const bars = bins.map((b, i) => {
+    const x0 = L + i * bw + 2, h = H - B - y(b.count);
+    return `<rect class="mark-bar" x="${x0}" y="${y(b.count)}" width="${bw - 4}" height="${Math.max(h, 0)}" rx="4"/>
+      <text x="${x0 + (bw - 4) / 2}" y="${H - B + 16}" text-anchor="middle">${ar(b.from)}–${ar(b.to)}</text>
+      <rect class="hit" x="${x0}" y="${T}" width="${bw - 4}" height="${H - T - B}" data-tip="${ar(b.from)}–${ar(b.to)} ثانية: ${ar(b.count)} مراجعة"/>`;
+  }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" direction="ltr" role="img" aria-label="توزيع مدة مراجعات الفيديو بالثواني">${ticks}${bars}
+    <text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle">مدة المراجعة (ثانية)</text></svg>`;
+}
+
+function candidates(fx) {
+  const key = fx.difficulty === "high" ? "mark_high" : "mark_all";
+  const rows = M.appointments.referees.map((r) => {
+    const why = [];
+    if (r.rest_days < 3) why.push(`راحة ${ar(r.rest_days)} يوم فقط`);
+    const met = r.last_teams.filter((t) => t === fx.home || t === fx.away);
+    if (met.length) why.push(`أدار مباراة ل${met.join(" و")} في آخر جولتين`);
+    if (fx.difficulty === "high" && !r.international) why.push("ليس على القائمة الدولية");
+    return { ...r, out: why, score: r[key] };
+  });
+  const ok = rows.filter((r) => !r.out.length).sort((a, b) => b.score - a.score);
+  const out = rows.filter((r) => r.out.length);
+  const tr = (r, i) => `<tr class="${r.out.length ? "out" : ""}">
+    <td>${r.out.length ? "—" : ar(i + 1)}</td><td><b>${esc(r.name)}</b>${r.international ? ' <span class="meta">(دولي)</span>' : ""}</td>
+    <td class="num">${ar(r.score)}</td><td class="num">${ar(r.rest_days)} أيام</td>
+    <td>${r.out.length ? "غير مناسب: " + r.out.map(esc).join("، ") : `مناسب · ${ar(r.matches_this_season)} مباريات هذا الموسم`}</td></tr>`;
+  return `<div class="compare-wrap"><table class="cands">
+    <thead><tr><th>الترتيب المقترح</th><th>الحكم</th><th>متوسط التقييم ${fx.difficulty === "high" ? "في المباريات الصعبة" : "هذا الموسم"}</th><th>الراحة</th><th>الملاحظة</th></tr></thead>
+    <tbody>${ok.map(tr).join("")}${out.map((r) => tr(r, 0)).join("")}</tbody></table></div>`;
+}
+
+function renderMock() {
+  const V = M.var_room;
+  const fx = M.appointments.fixtures;
+  $("mock-body").innerHTML = `
+    <article class="mock-card">
+      <div class="case-head"><h2>متابعة تطور الحكم خلال الموسم</h2><span class="stamp">مثال توضيحي</span></div>
+      <p class="lead">درجات المقيّمين للحكم أ في ${ar(M.progress.marks.length)} مباراة، وأكثر الملاحظات تكراراً في تقاريره. الهدف تحديد ما يحتاج تدريباً لكل حكم، لا ترتيب الحكام.</p>
+      <div class="chart">${progressChart()}</div>
+      <div class="chart">${errorBars()}</div>
+      <p class="needs">يحتاج: تقرير المقيّم لكل مباراة (الدرجة والملاحظات مصنّفة).</p>
+    </article>
+
+    <article class="mock-card">
+      <div class="case-head"><h2>مساعد تعيين الحكام</h2><span class="stamp">مثال توضيحي</span></div>
+      <p class="lead">اختر مباراة. الأداة تستبعد من لا تكفيه الراحة أو أدار مباراة لأحد الفريقين مؤخراً، ثم ترتّب الباقين بتقييمهم في مباريات بالصعوبة نفسها، وتشرح السبب. الأداة تقترح والقرار للجنة.</p>
+      <div class="fixtures" role="radiogroup" aria-label="المباراة">
+        ${fx.map((f, i) => `<label for="fx${i}"><input type="radio" name="fx" id="fx${i}" value="${i}"${i ? "" : " checked"}><span>${esc(f.home)} × ${esc(f.away)} · صعوبة ${f.difficulty_ar}</span></label>`).join("")}
+      </div>
+      <div id="cands">${candidates(fx[0])}</div>
+      <p class="needs">يحتاج: سجل التعيينات وتواريخها، وتقارير المقيّمين، وتصنيف اللجنة لصعوبة كل مباراة.</p>
+    </article>
+
+    <article class="mock-card">
+      <div class="case-head"><h2>غرفة الفيديو</h2><span class="stamp">مثال توضيحي</span></div>
+      <dl class="tiles">
+        <div><dt>مراجعة في الموسم</dt><dd>${ar(V.n)}</dd></div>
+        <div><dt>ثانية: الوسيط لمدة المراجعة</dt><dd>${ar(V.median)}</dd></div>
+        <div><dt>من المراجعات انتهت بذهاب الحكم للشاشة</dt><dd>${pct(V.ofr_share)}</dd></div>
+      </dl>
+      <div class="chart">${varHistogram()}</div>
+      <div class="compare-wrap"><table class="cands" style="min-width:420px">
+        <thead><tr><th>نوع الحالة</th><th>عدد المراجعات</th><th>الوسيط (ثانية)</th></tr></thead>
+        <tbody>${V.by_kind.map((k) => `<tr><td>${esc(k.kind)}</td><td class="num">${ar(k.n)}</td><td class="num">${ar(k.median)}</td></tr>`).join("")}</tbody></table></div>
+      <p class="needs">يحتاج: سجل غرفة الفيديو (وقت بدء كل مراجعة وانتهائها، ونوع الحالة، وهل ذهب الحكم للشاشة).</p>
+    </article>`;
+  document.querySelectorAll('input[name="fx"]').forEach((el) =>
+    el.addEventListener("change", () => { $("cands").innerHTML = candidates(fx[Number(el.value)]); }));
+  bindTips($("mock-body"));
+}
+
+const TABS = ["cases", "disputes", "method", "mock"];
 function show(tab) {
   if (!TABS.includes(tab)) tab = "cases";
   for (const t of TABS) {
@@ -410,6 +581,7 @@ setupFilters();
 renderCases();
 renderDisputes();
 renderMethod();
+renderMock();
 let start = location.hash.replace("#", "");
 if (!TABS.includes(start)) { try { start = localStorage.getItem("sofara-tab") || "cases"; } catch (e) { start = "cases"; } }
 show(start);

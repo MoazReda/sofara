@@ -23,3 +23,4 @@ broke. Format: Context → Decision → Consequences.
 | [0015](0015-committee-round-videos-are-rulings.md) | The committee's own round videos are official rulings |
 | [0016](0016-measuring-expert-agreement.md) | How expert agreement is measured, and what it never claims |
 | [0017](0017-demo-is-one-static-page.md) | The demo is one static Arabic page, with search checked against Python |
+| [0018](0018-mockups-are-synthetic-and-labelled.md) | Part D mockups are synthetic, invented and labelled everywhere |
