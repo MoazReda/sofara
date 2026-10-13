@@ -17,7 +17,7 @@ import sys
 from importlib.resources import files
 from pathlib import Path
 
-from sofara.agreement import load_opinion_reasons
+from sofara.agreement import load_case_comparisons, load_opinion_reasons
 from sofara.cases import load_cases
 from sofara.commendations import load_commendations
 from sofara.efa_lists import load_efa_lists
@@ -64,6 +64,7 @@ def build(
             counts.update(load_reviews(conn, raw_dir))
             counts.update(load_efa_lists(conn, raw_dir))
             counts.update(load_opinion_reasons(conn, raw_dir))
+            counts.update(load_case_comparisons(conn, raw_dir))
     finally:
         conn.close()
     tmp.replace(db_path)

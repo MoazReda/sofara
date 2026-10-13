@@ -343,6 +343,18 @@ CREATE TABLE opinion_reasons (
     PRIMARY KEY (opinion_id, reason)
 );
 
+-- one row = an expert saying two cases are alike and should get the same
+-- decision (a consistency check). Stored as the expert's claim, not ours.
+CREATE TABLE case_comparisons (
+    incident_id        INTEGER NOT NULL REFERENCES incidents(incident_id),
+    other_incident_id  INTEGER NOT NULL REFERENCES incidents(incident_id),
+    expert_id          INTEGER NOT NULL REFERENCES experts(expert_id),
+    note_ar            TEXT    NOT NULL,
+    source_url         TEXT    NOT NULL,
+    PRIMARY KEY (incident_id, other_incident_id, expert_id),
+    CHECK (incident_id <> other_incident_id)
+);
+
 -- ---------------------------------------------------------------------
 -- efa_lists: one row = one name on one official EFA list (the main
 -- Referees Committee, the international (FIFA) list, the first-degree

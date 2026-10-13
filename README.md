@@ -24,7 +24,7 @@ committee's own data could add.
 | Key Match Incidents | **45** cases from those 19 matches, with on-field / post-VAR decisions; **20** with an official committee ruling |
 | Expert opinions | **52** from 14 sources (ex-referees, analysts, pundits, the committee as reported) |
 | Expert commendations | **14** "best of the round" picks (rounds 1, 2, 4), each verified against the crews |
-| Tests | 142, run in CI on Windows + Ubuntu, Python 3.10 + 3.13 |
+| Tests | 147, run in CI on Windows + Ubuntu, Python 3.10 + 3.13 |
 
 The crew data was independently confirmed: every official named in Nasser
 Abbas's round reviews matches our records (match and role).
@@ -62,6 +62,13 @@ sofara-search "بلنتي"                      # penalties given first, then re
 sofara-search "هاند" --round 2
 sofara-search "الأهلي بلنتي"                # team names and referee names act as filters
 sofara-search "راح الشاشة" --quiz quiz.md  # video quiz: question first, answer folded away
+```
+
+### Where experts disagree
+
+```bash
+sofara-disputes --out disputes.md          # Arabic page: split cases, each side's grounds,
+                                           # the committee's ruling, consistency pairs
 ```
 
 The search is recall-first: it is built for an instructor who must not miss a
@@ -102,6 +109,7 @@ src/sofara/          the package
   reviews.py         loads match reviews (coverage)
   efa_lists.py       loads the EFA's own referee lists (committee, international, first degree)
   agreement.py       part ج: agreement measures + the grounds behind each opinion
+  disputes.py        `sofara-disputes`: the Arabic page of disagreements
   build.py           `sofara-build`
   report.py          `sofara-report`
   search.py          `sofara-search` + video-quiz export

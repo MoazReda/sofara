@@ -35,6 +35,8 @@ from sofara.registry import DataError, read_csv
 
 FILE = "opinion_reasons"
 COLUMNS = ["case_id", "expert", "reason"]
+COMPARISONS = "case_comparisons"
+COMPARISON_COLUMNS = ["case_id", "compared_case_id", "expert", "note_ar", "source_url"]
 NOT_INDEPENDENT = ("committee", "committee_source")
 MIN_OPINIONS = 3  # below this a case gets no label
 MIN_RULED = 10  # below this no agreement rate is shown for an expert
@@ -226,3 +228,45 @@ def load_opinion_reasons(conn: sqlite3.Connection, raw_dir: Path) -> dict[str, i
         raise
     conn.commit()
     return {"opinion_reasons": conn.execute("SELECT COUNT(*) FROM opinion_reasons").fetchone()[0]}
+
+
+def load_case_comparisons(conn: sqlite3.Connection, raw_dir: Path) -> dict[str, int]:
+    """Load case_comparisons.csv: an expert saying two cases deserve the same call."""
+    problems: list[str] = []
+    rows = read_csv(raw_dir / f"{COMPARISONS}.csv", COMPARISON_COLUMNS, problems)
+    sql = "SELECT name_ar, expert_id FROM experts"
+    experts = {normalize_name(n): i for n, i in conn.execute(sql)}
+    conn.execute("BEGIN")
+    try:
+        for row in rows:
+            where = row["_line"]
+            expert_id = experts.get(normalize_name(row["expert"] or ""))
+            if expert_id is None:
+                problems.append(f"{where}: unknown expert '{row['expert']}'")
+                continue
+            if not row["note_ar"] or not row["source_url"]:
+                problems.append(f"{where}: note_ar and source_url are required")
+                continue
+            try:
+                conn.execute(
+                    """INSERT INTO case_comparisons
+                       (incident_id, other_incident_id, expert_id, note_ar, source_url)
+                       VALUES (?, ?, ?, ?, ?)""",
+                    (
+                        row["case_id"],
+                        row["compared_case_id"],
+                        expert_id,
+                        row["note_ar"],
+                        row["source_url"],
+                    ),
+                )
+            except sqlite3.IntegrityError as e:
+                problems.append(f"{where}: rejected by database — {e}")
+        if problems:
+            raise DataError(problems)
+    except Exception:
+        conn.rollback()
+        raise
+    conn.commit()
+    n = conn.execute("SELECT COUNT(*) FROM case_comparisons").fetchone()[0]
+    return {"case_comparisons": n}
