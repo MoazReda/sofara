@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/MoazReda/sofara/actions/workflows/ci.yml/badge.svg)](https://github.com/MoazReda/sofara/actions/workflows/ci.yml)
 
+**Live demo (Arabic): <https://moazreda.github.io/sofara/>** — rebuilt from the data after every green CI run.
+
 Data tools for **developing** refereeing in the Egyptian Premier League,
 built on **real, public data only** — and honest about what public data can
 and cannot say.
@@ -73,6 +75,7 @@ sofara-site                                # writes site/index.html: one Arabic 
 
 The case library with the same search, where experts disagree, how the data
 was made, and what the committee's own data would add (synthetic mockups). It works offline ([decision 0017](docs/decisions/0017-demo-is-one-static-page.md)).
+GitHub Pages publishes it after every green CI run on `main` (`.github/workflows/pages.yml`).
 
 ### Where experts disagree
 
