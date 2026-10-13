@@ -40,7 +40,7 @@ Abbas's round reviews matches our records (match and role).
 - [ ] **A. Appointment assistant** — needs match-level cards and penalties (see Known gaps)
 - [~] **C. Expert-opinion analysis** — split score + Wilson range per case, grounds of each opinion, experts vs committee rulings ([decision 0016](docs/decisions/0016-measuring-expert-agreement.md)); by-background comparison waits for more data
 - [~] **Demo page** (`sofara-site`) — case library, disagreements, methodology
-- [x] **D. "What your data would add"** — demo tab: referee progress, appointment assistant, VAR room, all synthetic and labelled ([decision 0018](docs/decisions/0018-mockups-are-synthetic-and-labelled.md))
+- [x] **D. "What we build together"** — demo tab: eleven ideas in three tiers (start with, pilot together, longer vision), each with an example and a chart; synthetic and labelled except the case library, which runs on the real data ([decision 0018](docs/decisions/0018-mockups-are-synthetic-and-labelled.md))
 
 ## Quick start
 
@@ -74,7 +74,7 @@ sofara-site                                # writes site/index.html: one Arabic 
 ```
 
 The case library with the same search, where experts disagree, how the data
-was made, and what the committee's own data would add (synthetic mockups). It works offline ([decision 0017](docs/decisions/0017-demo-is-one-static-page.md)).
+was made, and what we could build with the committee's own data (labelled synthetic examples). It works offline ([decision 0017](docs/decisions/0017-demo-is-one-static-page.md)).
 GitHub Pages publishes it after every green CI run on `main` (`.github/workflows/pages.yml`).
 
 ### Where experts disagree

@@ -102,4 +102,7 @@ def test_mockups_use_no_real_name(conn, data):
 def test_mockup_tab_is_labelled_as_synthetic(data):
     page = render(data)
     assert "بيانات تجريبية بأسماء وهمية" in page
-    assert page.count("مثال توضيحي") >= 3
+    # every idea card goes through card(), which stamps it; only the case
+    # library, built on the real data, carries a different stamp
+    assert '<span class="stamp">مثال توضيحي</span>' in page
+    assert "يعمل الآن على بيانات حقيقية" in page

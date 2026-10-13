@@ -17,6 +17,9 @@
   --red: #c2392d;
   --red-soft: #f7e3e0;
   --amber-soft: #f6efd8;
+  --cat-1: #2a78d6;      /* categorical: three slots, validated all-pairs */
+  --cat-2: #eb6834;
+  --cat-3: #1baf7a;
   --font-display: "Noto Kufi Arabic", "Segoe UI", Tahoma, sans-serif;
   --font-body: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
   --step-0: 1rem;
@@ -29,13 +32,13 @@
   :root:not([data-theme="light"]) {
     --paper: #0e1411; --sheet: #151d18; --ink: #e4ebe6; --muted: #92a399; --line: #27332c;
     --pitch: #5cc08e; --pitch-soft: #173326; --yellow: #f0c94a; --red: #e7695d;
-    --red-soft: #3a1d1a; --amber-soft: #352d14; color-scheme: dark;
+    --red-soft: #3a1d1a; --amber-soft: #352d14; --cat-1: #3987e5; --cat-2: #d95926; --cat-3: #199e70; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --paper: #0e1411; --sheet: #151d18; --ink: #e4ebe6; --muted: #92a399; --line: #27332c;
   --pitch: #5cc08e; --pitch-soft: #173326; --yellow: #f0c94a; --red: #e7695d;
-  --red-soft: #3a1d1a; --amber-soft: #352d14; color-scheme: dark;
+  --red-soft: #3a1d1a; --amber-soft: #352d14; --cat-1: #3987e5; --cat-2: #d95926; --cat-3: #199e70; color-scheme: dark;
 }
 * { box-sizing: border-box; }
 body {
@@ -177,6 +180,64 @@ table.cands th { color: var(--muted); font-weight: 500; }
 table.cands tr.out td { color: var(--muted); }
 .tip { position: fixed; z-index: 10; pointer-events: none; background: var(--ink); color: var(--paper);
   font-size: .85rem; padding: 4px 8px; border-radius: 6px; white-space: nowrap; }
+
+/* vision tab */
+.vtitle { font-size: var(--step-2); }
+h3.group { font-size: var(--step-2); margin-block-start: 18px; }
+.roadmap { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.roadmap > div { background: var(--sheet); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; }
+.roadmap ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; }
+.linkish { font: inherit; color: var(--pitch); background: none; border: 0; padding: 0; cursor: pointer; text-align: start; text-decoration: underline; text-underline-offset: 3px; }
+.tier { font-size: .78rem; font-weight: 600; letter-spacing: .02em; color: var(--pitch); background: var(--pitch-soft); border-radius: 6px; padding: 1px 8px; }
+.vcard { background: var(--sheet); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; display: grid; gap: 14px; scroll-margin-top: 16px; align-content: start; }
+.vcard > * { min-width: 0; }
+.vcard h3 { font-size: var(--step-2); }
+.vcard h4 { margin: 0; font-size: 1rem; }
+.vhead { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.chart.heat svg { min-width: 600px; }
+.chart.narrow svg { max-width: 620px; margin-inline: auto; }
+.stamp.real { background: var(--pitch-soft); border-color: var(--pitch); color: var(--pitch); }
+.vs { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.vs > div { border-block-start: 2px solid var(--line); padding-block-start: 8px; }
+.vs > div:last-child { border-block-start-color: var(--pitch); }
+.vs p, .example { margin: 0; }
+.k { display: block; font-size: .78rem; font-weight: 600; color: var(--muted); letter-spacing: .02em; margin-block-end: 2px; }
+.example { background: var(--paper); border-radius: 8px; padding: 10px 12px; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: .82rem; color: var(--muted); }
+.legend .ramp { display: inline-flex; } .legend .ramp i { width: 22px; height: 12px; }
+.plan { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.plan > div { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 2px; }
+.plan ul { margin: 4px 0 0; padding-inline-start: 1.1em; font-size: .92rem; }
+.ask { display: grid; gap: 2px; border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 14px; background: var(--paper); }
+.ask b { font-weight: 600; }
+ol.playlist { list-style: none; margin: 0; padding: 0; display: grid; }
+ol.playlist li { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 12px; align-items: center; padding-block: 10px; border-block-end: 1px solid var(--line); }
+ol.playlist .n { color: var(--muted); font-weight: 600; }
+ol.playlist .what { display: grid; min-width: 0; }
+ol.playlist .go { grid-column: 2 / -1; display: flex; gap: 14px; font-size: .9rem; }
+.notes { display: grid; gap: 10px; }
+.notes blockquote { margin: 0; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
+.notes p { margin: 4px 0 0; line-height: 2.1; }
+.notes mark { background: color-mix(in oklab, var(--c) 18%, transparent); color: inherit; border-block-end: 2px solid var(--c); border-radius: 3px; padding-inline: 2px; }
+.legend.key { gap: 16px; margin-block: 10px 6px; color: var(--ink); } .legend.key span { display: inline-flex; align-items: center; gap: 6px; } .legend.key i { width: 14px; height: 14px; border-radius: 3px; }
+.chart .seg { stroke: var(--line); stroke-width: 6; stroke-linecap: round; }
+.chart .dot.end { fill: var(--red); }
+.chart .ci { stroke: var(--muted); stroke-width: 2; }
+.chart .link { stroke: var(--pitch); stroke-width: 3; opacity: .5; }
+.chart .before { fill: var(--sheet); stroke: var(--pitch); stroke-width: 2; }
+.chart .line { fill: none; stroke-width: 2; }
+.chart .end-dot { stroke: var(--sheet); stroke-width: 2; }
+.chart .iqr { fill: var(--pitch); opacity: .55; }
+.chart .med { stroke: var(--ink); stroke-width: 2; }
+.chart .ref { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 4 4; }
+.chart .turf { fill: var(--pitch-soft); }
+.chart .lines { fill: none; stroke: var(--muted); stroke-width: 1.5; }
+.chart .cone { fill: var(--yellow); opacity: .35; }
+.chart .ref-dot { fill: var(--ink); } .chart .incident { fill: var(--red); } .chart .ar-dot { fill: var(--muted); }
+.pilots { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 14px; }
+.pilots .chart svg { min-width: 360px; }
+.vcard.not { background: var(--paper); border-style: dashed; }
+.vcard.not p { margin: 0; max-width: 65ch; }
 footer { margin-block-start: 40px; color: var(--muted); font-size: .85rem; border-block-start: 1px solid var(--line); padding-block-start: 14px; }
 @media (prefers-reduced-motion: no-preference) { article.case { transition: border-color .15s; } article.case:hover { border-color: var(--muted); } }
 </style>
@@ -194,7 +255,7 @@ footer { margin-block-start: 40px; color: var(--muted); font-size: .85rem; borde
     <button role="tab" id="tab-cases" aria-controls="cases" aria-selected="true">مكتبة الحالات</button>
     <button role="tab" id="tab-disputes" aria-controls="disputes" aria-selected="false">حالات تحتاج توضيحاً</button>
     <button role="tab" id="tab-method" aria-controls="method" aria-selected="false">كيف بُنيت البيانات</button>
-    <button role="tab" id="tab-mock" aria-controls="mock" aria-selected="false">ماذا تضيف بيانات اللجنة</button>
+    <button role="tab" id="tab-mock" aria-controls="mock" aria-selected="false">ماذا نبني معاً</button>
   </nav>
 
   <section id="cases" role="tabpanel" aria-labelledby="tab-cases">
@@ -440,8 +501,10 @@ function setupFilters() {
 }
 
 
-// ---- part D: mockups (synthetic data, invented names) ----
+// ---- part D: what the committee's data would add (synthetic, invented names) ----
 const M = DATA.mock;
+const V = M.vision;
+const THEME_VAR = { positioning: "--cat-1", timing: "--cat-2", management: "--cat-3" };
 const tip = document.createElement("div");
 tip.className = "tip"; tip.hidden = true; document.body.append(tip);
 function bindTips(root) {
@@ -455,37 +518,6 @@ function bindTips(root) {
   });
 }
 
-function progressChart() {
-  const pts = M.progress.marks;
-  const W = 640, H = 240, L = 40, R = 16, T = 16, B = 36;
-  const x = (i) => L + (i * (W - L - R)) / (pts.length - 1);
-  const y = (v) => T + ((10 - v) * (H - T - B)) / 4; // scale 6..10
-  const grid = [6, 7, 8, 9, 10].map((v) =>
-    `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${ar(v)}</text>`).join("");
-  const line = pts.map((p, i) => `${i ? "L" : "M"}${x(i)},${y(p.mark)}`).join("");
-  const xl = pts.map((p, i) => (i % 2 === 0 || i === pts.length - 1)
-    ? `<text x="${x(i)}" y="${H - 14}" text-anchor="middle">${ar(p.match)}</text>` : "").join("");
-  const dots = pts.map((p, i) => `<circle class="dot" cx="${x(i)}" cy="${y(p.mark)}" r="5"/>
-    <circle class="hit" cx="${x(i)}" cy="${y(p.mark)}" r="14" data-tip="مباراة ${ar(p.match)} · درجة ${ar(p.mark)} · صعوبة ${({ high: "مرتفعة", medium: "متوسطة", low: "منخفضة" })[p.difficulty]}"/>`).join("");
-  const last = pts[pts.length - 1];
-  return `<svg viewBox="0 0 ${W} ${H}" direction="ltr" role="img" aria-label="درجات تقييم الحكم أ في ${ar(pts.length)} مباراة، من ${ar(pts[0].mark)} إلى ${ar(last.mark)}">
-    ${grid}<path class="series" d="${line}"/>${dots}${xl}
-    <text x="${x(pts.length - 1) - 8}" y="${y(last.mark) - 12}" text-anchor="end" style="fill:var(--ink);font-weight:600">${ar(last.mark)}</text>
-    <text x="${(L + W - R) / 2}" y="${H - 1}" text-anchor="middle">رقم المباراة في الموسم</text></svg>`;
-}
-
-function errorBars() {
-  const rows = M.progress.errors, max = Math.max(...rows.map((r) => r.count));
-  const W = 640, rowH = 34, H = rows.length * rowH + 8, L = 200, R = 40;
-  const bars = rows.map((r, i) => {
-    const w = ((W - L - R) * r.count) / max, yy = 8 + i * rowH;
-    return `<text x="${L - 10}" y="${yy + 17}" text-anchor="end" style="fill:var(--ink)">${esc(r.type)}</text>
-      <rect class="mark-bar" x="${L}" y="${yy + 4}" width="${w}" height="18" rx="4"/>
-      <text x="${L + w + 8}" y="${yy + 17}">${ar(r.count)}</text>
-      <rect class="hit" x="${L}" y="${yy}" width="${W - L - R}" height="${rowH - 4}" data-tip="${esc(r.type)}: ${ar(r.count)} ملاحظات"/>`;
-  }).join("");
-  return `<svg viewBox="0 0 ${W} ${H}" direction="ltr" role="img" aria-label="أكثر ملاحظات المقيّمين تكراراً للحكم أ">${bars}</svg>`;
-}
 
 function varHistogram() {
   const bins = M.var_room.bins, max = Math.max(...bins.map((b) => b.count));
@@ -525,43 +557,262 @@ function candidates(fx) {
     <tbody>${ok.map(tr).join("")}${out.map((r) => tr(r, 0)).join("")}</tbody></table></div>`;
 }
 
+
+function heatmap() {
+  // RTL-native: type labels on the right, the season runs right to left
+  const P = V.profile, cw = 64, ch = 34, R = 120, T = 26, n = P.periods.length;
+  const W = R + cw * n + 6, H = T + ch * P.grid.length + 8;
+  const cx = (i) => 6 + (n - 1 - i) * cw;
+  const shade = (v) => Math.round(Math.max(8, Math.min(92, ((v - 0.5) / 0.48) * 100)));
+  const head = P.periods.map((m, i) => `<text x="${cx(i) + cw / 2}" y="16" text-anchor="middle">${m}</text>`).join("");
+  const rows = P.grid.map((r, j) => {
+    const y = T + j * ch;
+    const cells = r.values.map((v, i) => {
+      const s = shade(v), x = cx(i);
+      return `<rect x="${x + 2}" y="${y + 2}" width="${cw - 4}" height="${ch - 4}" rx="4" style="fill:color-mix(in oklab, var(--pitch) ${s}%, var(--sheet))"/>
+        <text x="${x + cw / 2}" y="${y + ch / 2 + 4}" text-anchor="middle" style="fill:${s > 55 ? "var(--sheet)" : "var(--ink)"};font-weight:600">${pct(v)}</text>
+        <rect class="hit" x="${x}" y="${y}" width="${cw}" height="${ch}" data-tip="${esc(r.type)} · ${P.periods[i]}: ${pct(v)} قرارات صحيحة"/>`;
+    }).join("");
+    return `<text x="${W - 4}" y="${y + ch / 2 + 4}" text-anchor="end" style="fill:var(--ink)">${esc(r.type)}</text>${cells}`;
+  }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" direction="ltr" role="img" aria-label="نسبة القرارات الصحيحة للحكم أ حسب نوع الحالة والشهر">${head}${rows}</svg>`;
+}
+
+function heatLegend() {
+  const stops = [10, 30, 50, 70, 90].map((s) => `<i style="background:color-mix(in oklab, var(--pitch) ${s}%, var(--sheet))"></i>`).join("");
+  return `<div class="legend"><span>٥٠٪</span><span class="ramp">${stops}</span><span>٩٨٪</span><span class="meta">نسبة القرارات الصحيحة</span></div>`;
+}
+
+function smartLibrary() {
+  const res = runSearch("هاند", DATA.cases, DATA.index).results.filter((r) => r.case.status === "ruled");
+  const rows = res.map((r, i) => {
+    const c = r.case;
+    return `<li><span class="n num">${ar(i + 1)}</span>
+      <span class="what"><b>${esc(c.home)} × ${esc(c.away)}</b><span class="meta num">الجولة ${ar(c.round)}${minuteText(c)}</span></span>
+      ${statusPill(c)}
+      <span class="go">${c.video_url ? `<a href="${esc(c.video_url)}" target="_blank" rel="noopener">الكليب ↗</a>` : ""}${c.ruling_url ? `<a href="${esc(c.ruling_url)}" target="_blank" rel="noopener">شرح اللجنة ↗</a>` : ""}</span></li>`;
+  }).join("");
+  return `<div class="ask"><span class="meta">المحاضر يكتب:</span><b>«هات كل حالات لمسة اليد التي صدر فيها حكم من اللجنة»</b></div>
+    <ol class="playlist">${rows}</ol>
+    <p class="meta">${ar(res.length)} حالات من الموسم الحالي، بيانات حقيقية، في أقل من ثانية. <button type="button" class="linkish" id="open-lib">افتح مكتبة الحالات</button></p>`;
+}
+
+function noteHtml(n) {
+  let out = "", at = 0;
+  for (const s of n.spans) {
+    out += esc(n.text.slice(at, s.start));
+    out += `<mark style="--c:var(${THEME_VAR[s.theme]})" title="${esc(V.nlp.themes[s.theme])}">${esc(n.text.slice(s.start, s.end))}</mark>`;
+    at = s.end;
+  }
+  return out + esc(n.text.slice(at));
+}
+
+function themeKey() {
+  return `<div class="legend key">${Object.entries(V.nlp.themes).map(([k, l]) => `<span><i style="background:var(${THEME_VAR[k]})"></i>${esc(l)}</span>`).join("")}</div>`;
+}
+
+function themeBars() {
+  const t = V.nlp.totals, keys = Object.keys(t), max = Math.max(...keys.map((k) => t[k]));
+  const W = 560, rowH = 36, L = 170, R = 60, H = keys.length * rowH + 6;
+  const bars = keys.map((k, i) => {
+    const w = ((W - L - R) * t[k]) / max, y = 6 + i * rowH;
+    return `<text x="${L - 10}" y="${y + 18}" text-anchor="end" style="fill:var(--ink)">${esc(V.nlp.themes[k])}</text>
+      <rect x="${L}" y="${y + 6}" width="${w}" height="18" rx="4" style="fill:var(${THEME_VAR[k]})"/>
+      <text x="${L + w + 8}" y="${y + 19}">${ar(t[k])} تقريراً</text>
+      <rect class="hit" x="${L}" y="${y}" width="${W - L - R}" height="${rowH - 4}" data-tip="${esc(V.nlp.themes[k])}: ذُكرت في ${ar(t[k])} من ${ar(V.nlp.reports)} تقريراً"/>`;
+  }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" direction="ltr" role="img" aria-label="أكثر الملاحظات تكراراً في تقارير المقيّمين">${bars}</svg>`;
+}
+
+function varTimeline() {
+  const st = V.var_timeline, end = st[st.length - 1].t, W = 640, L = 56, R = 56, y = 46;
+  const x = (t) => L + ((W - L - R) * t) / end;
+  const segs = st.slice(1).map((s, i) => `<line x1="${x(st[i].t)}" x2="${x(s.t)}" y1="${y}" y2="${y}" class="seg"/>
+    <text x="${(x(st[i].t) + x(s.t)) / 2}" y="${y - 12}" text-anchor="middle" direction="rtl">${ar(s.t - st[i].t)} ث</text>`).join("");
+  const dots = st.map((s, i) => `<circle cx="${x(s.t)}" cy="${y}" r="7" class="${i === st.length - 1 ? "dot end" : "dot"}"/>
+    ${i % 2 ? `<line x1="${x(s.t)}" x2="${x(s.t)}" y1="${y + 10}" y2="${y + 44}" class="grid"/>` : ""}
+    <text x="${x(s.t)}" y="${y + 28 + (i % 2) * 34}" text-anchor="middle" style="fill:var(--ink)">${esc(s.label)}</text>
+    <text x="${x(s.t)}" y="${y + 46 + (i % 2) * 34}" text-anchor="middle" direction="rtl">${ar(s.t)} ث</text>`).join("");
+  return `<svg viewBox="0 0 ${W} 138" direction="ltr" role="img" aria-label="مراحل مراجعة فيديو واحدة استغرقت ${ar(end)} ثانية">${segs}${dots}</svg>`;
+}
+
+function dumbbell() {
+  const g = V.pilots.training.groups, W = 440, rowH = 54, L = 130, R = 30, H = g.length * rowH + 30;
+  const x = (v) => L + ((W - L - R) * (v - 0.6)) / 0.3; // 60%..90%
+  const ticks = [0.6, 0.7, 0.8, 0.9].map((v) => `<line class="grid" x1="${x(v)}" x2="${x(v)}" y1="4" y2="${H - 22}"/><text x="${x(v)}" y="${H - 6}" text-anchor="middle">${pct(v)}</text>`).join("");
+  const rows = g.map((r, i) => {
+    const y = 22 + i * rowH;
+    return `<text x="${L - 12}" y="${y + 4}" text-anchor="end" style="fill:var(--ink)">${esc(r.group)}</text>
+      <line x1="${x(r.lo)}" x2="${x(r.hi)}" y1="${y}" y2="${y}" class="ci"/>
+      <line x1="${x(r.before)}" x2="${x(r.after)}" y1="${y}" y2="${y}" class="link"/>
+      <circle cx="${x(r.before)}" cy="${y}" r="6" class="before"/><circle cx="${x(r.after)}" cy="${y}" r="7" class="dot"/>
+      <rect class="hit" x="${L}" y="${y - 16}" width="${W - L - R}" height="32" data-tip="${esc(r.group)} (${ar(r.n)} حكماً): ${pct(r.before)} ← ${pct(r.after)}، والنطاق المحتمل بعد التدريب ${pct(r.lo)}–${pct(r.hi)}"/>`;
+  }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" direction="ltr" role="img" aria-label="دقة قرارات لمسة اليد قبل المحاضرة وبعدها">${ticks}${rows}</svg>`;
+}
+
+function talentLines() {
+  const t = V.pilots.talent, W = 440, H = 210, L = 34, R = 74, T = 12, B = 26, n = t[0].marks.length;
+  const x = (i) => L + ((W - L - R) * i) / (n - 1), y = (v) => T + ((8.2 - v) * (H - T - B)) / 1.6; // 6.6..8.2
+  const ticks = [6.6, 7.0, 7.4, 7.8, 8.2].map((v) => `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${ar(v)}</text>`).join("");
+  const lines = t.map((s, k) => {
+    const c = `var(--cat-${k + 1})`, last = s.marks[n - 1];
+    return `<path d="${s.marks.map((v, i) => `${i ? "L" : "M"}${x(i)},${y(v)}`).join("")}" style="stroke:${c}" class="line"/>
+      <circle cx="${x(n - 1)}" cy="${y(last)}" r="4.5" style="fill:${c}" class="end-dot"/>
+      <text x="${x(n - 1) + 9}" y="${y(last) + 4}" style="fill:var(--ink)">${esc(s.name)}</text>
+      ${s.marks.map((v, i) => `<circle class="hit" cx="${x(i)}" cy="${y(v)}" r="9" data-tip="${esc(s.name)} · مباراة ${ar(i + 1)}: ${ar(v)}"/>`).join("")}`;
+  }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" direction="ltr" role="img" aria-label="درجات ثلاثة حكام من الدرجة الأولى في عشر مباريات">${ticks}${lines}
+    <text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle">المباريات (١ ← ١٠)</text></svg>`;
+}
+
+function fatigueDots() {
+  const f = V.pilots.fatigue, W = 440, H = 190, L = 40, R = 12, T = 14, B = 30;
+  const x = (i) => L + ((W - L - R) * (i + 0.5)) / f.length, y = (v) => T + ((0.9 - v) * (H - T - B)) / 0.2; // 70..90
+  const ticks = [0.7, 0.8, 0.9].map((v) => `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${pct(v)}</text>`).join("");
+  const path = f.map((d, i) => `${i ? "L" : "M"}${x(i)},${y(d.accuracy)}`).join("");
+  const dots = f.map((d, i) => `<circle cx="${x(i)}" cy="${y(d.accuracy)}" r="5" class="dot"/>
+    <text x="${x(i)}" y="${H - 10}" text-anchor="middle">${d.bin}</text>
+    <circle class="hit" cx="${x(i)}" cy="${y(d.accuracy)}" r="14" data-tip="الدقائق ${d.bin}: ${pct(d.accuracy)} قرارات صحيحة"/>`).join("");
+  const last = f[f.length - 1];
+  return `<svg viewBox="0 0 ${W} ${H}" direction="ltr" role="img" aria-label="دقة القرارات حسب ربع الساعة من المباراة">${ticks}<path d="${path}" class="series"/>${dots}
+    <text x="${x(f.length - 1) - 10}" y="${y(last.accuracy) + 4}" text-anchor="end" style="fill:var(--ink);font-weight:600">${pct(last.accuracy)}</text></svg>`;
+}
+
+function assessorRanges() {
+  const a = V.pilots.assessors, W = 440, rowH = 30, L = 90, R = 20, H = a.length * rowH + 30;
+  const x = (v) => L + ((W - L - R) * (v - 6)) / 3.5; // 6..9.5
+  const all = a.map((r) => r.median).sort((p, q) => p - q), mid = all[Math.floor(all.length / 2)];
+  const ticks = [6, 7, 8, 9].map((v) => `<line class="grid" x1="${x(v)}" x2="${x(v)}" y1="4" y2="${H - 22}"/><text x="${x(v)}" y="${H - 6}" text-anchor="middle">${ar(v)}</text>`).join("");
+  const rows = a.map((r, i) => {
+    const y = 16 + i * rowH;
+    return `<text x="${L - 10}" y="${y + 4}" text-anchor="end" style="fill:var(--ink)">${esc(r.name)}</text>
+      <line x1="${x(r.low)}" x2="${x(r.high)}" y1="${y}" y2="${y}" class="ci"/>
+      <rect x="${x(r.q1)}" y="${y - 6}" width="${x(r.q3) - x(r.q1)}" height="12" rx="4" class="iqr"/>
+      <line x1="${x(r.median)}" x2="${x(r.median)}" y1="${y - 8}" y2="${y + 8}" class="med"/>
+      <rect class="hit" x="${L}" y="${y - 12}" width="${W - L - R}" height="24" data-tip="${esc(r.name)}: الوسيط ${ar(r.median)}، ونصف درجاته بين ${ar(r.q1)} و${ar(r.q3)}"/>`;
+  }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" direction="ltr" role="img" aria-label="توزيع الدرجات التي يمنحها كل مقيّم">${ticks}
+    <line x1="${x(mid)}" x2="${x(mid)}" y1="4" y2="${H - 22}" class="ref"/>${rows}</svg>`;
+}
+
+function pitchSketch() {
+  return `<svg viewBox="0 0 560 250" role="img" aria-label="رسم توضيحي: موقع الحكم وزاوية رؤيته لحظة الحالة داخل منطقة الجزاء">
+    <rect x="10" y="10" width="540" height="230" rx="6" class="turf"/>
+    <rect x="370" y="55" width="180" height="140" class="lines"/><rect x="490" y="95" width="60" height="60" class="lines"/>
+    <path d="M370,95 A40,40 0 0,0 370,155" class="lines"/><line x1="10" y1="10" x2="10" y2="240" class="lines"/>
+    <path d="M250,170 L455,92 L470,150 Z" class="cone"/>
+    <circle cx="250" cy="170" r="9" class="ref-dot"/><text x="250" y="200" text-anchor="middle" style="fill:var(--ink)">الحكم</text>
+    <circle cx="460" cy="120" r="8" class="incident"/><text x="460" y="108" text-anchor="middle" style="fill:var(--ink)">الحالة</text>
+    <circle cx="520" cy="236" r="6" class="ar-dot"/><text x="506" y="232" text-anchor="end">المساعد</text>
+    <text x="300" y="120" style="fill:var(--ink)">زاوية الرؤية ٢٤°</text><text x="300" y="138">المسافة ٢١ م</text></svg>`;
+}
+
+function card(id, tier, title, today, withData, example, visual, needs, extra = "") {
+  return `<article class="vcard" id="${id}">
+    <div class="vhead"><span class="tier">${tier}</span><span class="stamp">مثال توضيحي</span></div>
+    <h3>${title}</h3>
+    <div class="vs"><div><span class="k">اليوم</span><p>${today}</p></div><div><span class="k">مع البيانات</span><p>${withData}</p></div></div>
+    ${example ? `<p class="example"><span class="k">مثال</span>${example}</p>` : ""}
+    ${visual}${extra}
+    <p class="needs">يحتاج: ${needs}</p></article>`;
+}
+
 function renderMock() {
-  const V = M.var_room;
-  const fx = M.appointments.fixtures;
-  $("mock-body").innerHTML = `
-    <article class="mock-card">
-      <div class="case-head"><h2>متابعة تطور الحكم خلال الموسم</h2><span class="stamp">مثال توضيحي</span></div>
-      <p class="lead">درجات المقيّمين للحكم أ في ${ar(M.progress.marks.length)} مباراة، وأكثر الملاحظات تكراراً في تقاريره. الهدف تحديد ما يحتاج تدريباً لكل حكم، لا ترتيب الحكام.</p>
-      <div class="chart">${progressChart()}</div>
-      <div class="chart">${errorBars()}</div>
-      <p class="needs">يحتاج: تقرير المقيّم لكل مباراة (الدرجة والملاحظات مصنّفة).</p>
-    </article>
+  const VR = M.var_room, fx = M.appointments.fixtures;
+  const roadmap = [
+    ["نبدأ بها", [["v-profile", "ملف تطوير لكل حكم"], ["v-library", "مكتبة الحالات الذكية"], ["v-notes", "قراءة تقارير المقيّمين آلياً"], ["v-var", "تحليلات غرفة الفيديو"], ["v-appoint", "مساعد تعيين الطواقم"]]],
+    ["نجرّبها معاً", [["v-training", "هل يؤتي التدريب ثماره؟"], ["v-rising", "دعم الحكام الصاعدين"], ["v-fitness", "اللياقة ودقة القرار"], ["v-fair", "عدالة التقييم"]]],
+    ["رؤية أبعد", [["v-vision", "تحليل فيديو المباريات"], ["v-not", "ما لن نفعله"]]],
+  ];
+  const map = `<nav class="roadmap" aria-label="خريطة الأفكار">${roadmap.map(([t, items]) => `<div><span class="tier">${t}</span><ul>${items.map(([id, l]) => `<li><button type="button" class="linkish" data-go="${id}">${l}</button></li>`).join("")}</ul></div>`).join("")}</nav>`;
 
-    <article class="mock-card">
-      <div class="case-head"><h2>مساعد تعيين الحكام</h2><span class="stamp">مثال توضيحي</span></div>
-      <p class="lead">اختر مباراة. الأداة تستبعد من لا تكفيه الراحة أو أدار مباراة لأحد الفريقين مؤخراً، ثم ترتّب الباقين بتقييمهم في مباريات بالصعوبة نفسها، وتشرح السبب. الأداة تقترح والقرار للجنة.</p>
-      <div class="fixtures" role="radiogroup" aria-label="المباراة">
-        ${fx.map((f, i) => `<label for="fx${i}"><input type="radio" name="fx" id="fx${i}" value="${i}"${i ? "" : " checked"}><span>${esc(f.home)} × ${esc(f.away)} · صعوبة ${f.difficulty_ar}</span></label>`).join("")}
-      </div>
-      <div id="cands">${candidates(fx[0])}</div>
-      <p class="needs">يحتاج: سجل التعيينات وتواريخها، وتقارير المقيّمين، وتصنيف اللجنة لصعوبة كل مباراة.</p>
-    </article>
+  const profile = card("v-profile", "نبدأ بها", "ملف تطوير لكل حكم",
+    "تقارير المقيّمين متفرقة بين الورق والملفات، وكل الحكام يحضرون التدريب نفسه.",
+    "ملف واحد لكل حكم يبين دقته في كل نوع حالة عبر الموسم، ويقترح خطة تطوير مربوطة بمحتوى التدريب الموجود لديكم.",
+    "قبل اجتماع منتصف الموسم يفتح المسؤول ملف الحكم أ، فيرى أن قرارات ركلات الجزاء تتراجع منذ ديسمبر، وأن لمسة اليد تحسنت بعد محاضرة أكتوبر.",
+    `<div class="chart heat">${heatmap()}</div>${heatLegend()}
+     <div class="plan">${V.profile.plan.map((p) => `<div><b>${esc(p.focus)}</b><span class="meta">${esc(p.why)}</span><ul>${p.content.map((c) => `<li>${esc(c)}</li>`).join("")}</ul></div>`).join("")}</div>`,
+    "تقارير المقيّمين لكل مباراة، مصنفة بنوع الحالة، ومحتوى التدريب الحالي.");
 
-    <article class="mock-card">
-      <div class="case-head"><h2>غرفة الفيديو</h2><span class="stamp">مثال توضيحي</span></div>
-      <dl class="tiles">
-        <div><dt>مراجعة في الموسم</dt><dd>${ar(V.n)}</dd></div>
-        <div><dt>ثانية: الوسيط لمدة المراجعة</dt><dd>${ar(V.median)}</dd></div>
-        <div><dt>من المراجعات انتهت بذهاب الحكم للشاشة</dt><dd>${pct(V.ofr_share)}</dd></div>
-      </dl>
-      <div class="chart">${varHistogram()}</div>
-      <div class="compare-wrap"><table class="cands" style="min-width:420px">
-        <thead><tr><th>نوع الحالة</th><th>عدد المراجعات</th><th>الوسيط (ثانية)</th></tr></thead>
-        <tbody>${V.by_kind.map((k) => `<tr><td>${esc(k.kind)}</td><td class="num">${ar(k.n)}</td><td class="num">${ar(k.median)}</td></tr>`).join("")}</tbody></table></div>
-      <p class="needs">يحتاج: سجل غرفة الفيديو (وقت بدء كل مراجعة وانتهائها، ونوع الحالة، وهل ذهب الحكم للشاشة).</p>
-    </article>`;
+  const library = `<article class="vcard real" id="v-library">
+    <div class="vhead"><span class="tier">نبدأ بها</span><span class="stamp real">يعمل الآن على بيانات حقيقية</span></div>
+    <h3>مكتبة الحالات الذكية</h3>
+    <div class="vs"><div><span class="k">اليوم</span><p>المحاضر يبحث عن الكليبات بيده قبل كل محاضرة.</p></div>
+      <div><span class="k">مع البيانات</span><p>يكتب ما يريده بكلامه، فتخرج القائمة جاهزة بروابط الفيديو وشرح اللجنة.</p></div></div>
+    ${smartLibrary()}
+    <p class="needs">يحتاج لتغطية كاملة: كل حالات المباراة من تقارير الحكام والمقيّمين، لا المنشور منها فقط.</p></article>`;
+
+  const notes = card("v-notes", "نبدأ بها", "قراءة تقارير المقيّمين آلياً",
+    "ملاحظات المقيّمين نصوص حرة، ومعرفة المشكلة التي تتكرر عند حكم أو عند الجميع تحتاج قراءة مئات التقارير.",
+    "نموذج لغوي عربي يقرأ الملاحظات ويصنفها في محاور ثابتة، حتى لو كُتبت بصيغ مختلفة، ثم يجمعها لكل حكم وللموسم كله.",
+    "",
+    `${themeKey()}<div class="notes">${V.nlp.notes.map((n, i) => `<blockquote><span class="meta">من تقرير مقيّم، مباراة ${ar(i + 1)}</span><p>${noteHtml(n)}</p></blockquote>`).join("")}</div>
+     <h4>أكثر المحاور تكراراً في ${ar(V.nlp.reports)} تقريراً</h4><div class="chart">${themeBars()}</div>
+     <p class="meta">النصوص هنا مكتوبة للتوضيح، والتظليل فيها بقاموس عبارات بسيط. مع تقارير حقيقية نبني نموذجاً عربياً مدرَّباً (مثل AraBERT) ونقيس دقته قبل الاعتماد عليه.</p>`,
+    "نصوص تقارير المقيّمين، وعينة صغيرة يصنفها خبير لنقيس بها دقة النموذج.");
+
+  const varCard = card("v-var", "نبدأ بها", "تحليلات غرفة الفيديو",
+    "الجمهور يرى المراجعة طويلة أو متأخرة، ولا توجد أرقام تبين أين يضيع الوقت.",
+    "زمن كل مرحلة في كل مراجعة، ونسبة تغيير القرار، وأنواع الحالات الأبطأ.",
+    "مراجعة واحدة لركلة جزاء: أين ذهبت الثلاث والثمانون ثانية؟",
+    `<div class="chart">${varTimeline()}</div>
+     <dl class="tiles"><div><dt>مراجعة في الموسم</dt><dd>${ar(VR.n)}</dd></div><div><dt>ثانية: الوسيط لمدة المراجعة</dt><dd>${ar(VR.median)}</dd></div><div><dt>انتهت بذهاب الحكم للشاشة</dt><dd>${pct(VR.ofr_share)}</dd></div></dl>
+     <div class="chart narrow">${varHistogram()}</div>`,
+    "سجل غرفة الفيديو: وقت كل مرحلة، ونوع الحالة، والقرار.");
+
+  const appoint = card("v-appoint", "نبدأ بها", "مساعد تعيين الطواقم",
+    "قرار كل أسبوع تحت ضغط إعلامي، وتفاصيل الراحة والتكرار والعدالة في الذاكرة.",
+    "الأداة تستبعد من لا تكفيه الراحة أو أدار مباراة لأحد الفريقين مؤخراً، وترتب الباقين بتقييمهم في مباريات بالصعوبة نفسها، وتشرح السبب. القرار يبقى للجنة.",
+    "",
+    `<div class="fixtures" role="radiogroup" aria-label="المباراة">${fx.map((f, i) => `<label for="fx${i}"><input type="radio" name="fx" id="fx${i}" value="${i}"${i ? "" : " checked"}><span>${esc(f.home)} × ${esc(f.away)} · صعوبة ${f.difficulty_ar}</span></label>`).join("")}</div>
+     <div id="cands">${candidates(fx[0])}</div>`,
+    "سجل التعيينات وتواريخها، وتقارير المقيّمين، وتصنيف اللجنة لصعوبة كل مباراة.");
+
+  const tr = V.pilots.training;
+  const pilots = `<div class="pilots">
+    ${card("v-training", "نجرّبها معاً", "هل يؤتي التدريب ثماره؟",
+      "نعرف من حضر المحاضرة، ولا نعرف إن تحسنت قراراته بعدها.",
+      "نقارن دقة من حضر بمن لم يحضر بعد، مع نطاق الثقة. نختبر ولا نَعِد بنتيجة.", "",
+      `<div class="chart">${dumbbell()}</div><p class="meta">النقطة الفاتحة قبل محاضرة ${esc(tr.topic)}، والداكنة بعدها، والخط الرفيع هو النطاق المحتمل.</p>`,
+      "تواريخ المحاضرات وحضورها، وتقييم القرارات قبلها وبعدها.")}
+    ${card("v-rising", "نجرّبها معاً", "دعم الحكام الصاعدين",
+      "الترقية تعتمد على الانطباع والتقارير المتفرقة.",
+      "منحنى تطور كل حكم في الدرجة الأولى، لنعرف من يقترب من الجاهزية ومن يحتاج دعماً مبكراً.", "",
+      `<div class="chart">${talentLines()}</div>`,
+      "تقارير حكام الدرجة الأولى عبر أكثر من موسم.")}
+    ${card("v-fitness", "نجرّبها معاً", "اللياقة ودقة القرار",
+      "اختبارات اللياقة منفصلة عن الأداء في الملعب.",
+      "هل تقل دقة القرار مع التعب في آخر المباراة؟ الإجابة تغير شكل برنامج اللياقة.", "",
+      `<div class="chart">${fatigueDots()}</div>`,
+      "بيانات GPS من المباريات، وتوقيت كل قرار.")}
+    ${card("v-fair", "نجرّبها معاً", "عدالة التقييم",
+      "درجة الحكم قد تتأثر بمن قيّمه.",
+      "نتأكد أن كل المقيّمين يستخدمون المعيار نفسه، فيصبح التقييم عادلاً لكل حكم. الهدف عدالة الحكم، لا الحكم على المقيّمين.", "",
+      `<div class="chart">${assessorRanges()}</div><p class="meta">الخط المتقطع هو الوسيط العام. الشريط السميك نصف الدرجات، والخط الرفيع المدى.</p>`,
+      "درجات كل المقيّمين لنفس الحكام عبر الموسم.")}
+  </div>`;
+
+  const future = `<div class="pilots">
+    ${card("v-vision", "رؤية أبعد", "تحليل فيديو المباريات",
+      "التمركز يُقيَّم بالعين من الإعادة.",
+      "قياس مكان الحكم وزاوية رؤيته لحظة الحالة من فيديو المباراة. مشروع بحثي طويل يحتاج زوايا تصوير محددة.", "",
+      `<div class="chart">${pitchSketch()}</div>`, "فيديو المباريات بزوايا كاملة، وشراكة بحثية.")}
+    <article class="vcard not" id="v-not"><div class="vhead"><span class="tier">ما لن نفعله</span></div>
+      <h3>لن نبني نظاماً يحكم على القرارات</h3>
+      <p>الحكم على القرار يبقى للحكم في الملعب وللجنة بعده. دور البيانات أن تختصر الوقت وتكشف ما يتكرر وتساعد في التدريب، لا أن تحل محل الخبرة. ولا يوجد اتحاد في العالم يعتمد ذلك رسمياً.</p></article>
+  </div>`;
+
+  $("mock-body").innerHTML = `<h2 class="vtitle">ماذا نبني معاً ببيانات اللجنة</h2>${map}
+    <h3 class="group">نبدأ بها</h3>${profile}${library}${notes}${varCard}${appoint}
+    <h3 class="group">نجرّبها معاً</h3><p class="lead">أفكار تحتاج بيانات كافية ومنهجية حذرة، نعرضها كتجارب لا كوعود.</p>${pilots}
+    <h3 class="group">رؤية أبعد</h3>${future}`;
+
   document.querySelectorAll('input[name="fx"]').forEach((el) =>
     el.addEventListener("change", () => { $("cands").innerHTML = candidates(fx[Number(el.value)]); }));
+  document.querySelectorAll("[data-go]").forEach((b) =>
+    b.addEventListener("click", () => $(b.dataset.go).scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" })));
+  $("open-lib").addEventListener("click", () => { show("cases"); $("q").value = "هاند"; $("status").value = "ruled"; renderCases(); window.scrollTo(0, 0); });
   bindTips($("mock-body"));
 }
 

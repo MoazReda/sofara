@@ -131,4 +131,207 @@ def mockups() -> dict:
         "appointments": appointments,
         "var_room": _var_room(rng),
         "referees": appointments["referees"],
+        "vision": vision(),
+    }
+
+
+# ---- the vision tab (part د, v2) --------------------------------------------
+
+CASE_TYPES = ["لمسة اليد", "التسلل", "ركلات الجزاء", "الإنذارات", "الطرد", "قانون الميزة"]
+PERIODS = ["أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر", "يناير", "فبراير", "مارس"]
+
+# what an assessor's free-text notes are about; three themes so every colour on
+# the page stays distinguishable (decision 0018, dataviz checks)
+NOTE_THEMES = {
+    "positioning": (
+        "التمركز وزاوية الرؤية",
+        ["بعيداً عن الحالة", "زاوية رؤية", "خلف اللعب", "التمركز"],
+    ),
+    "timing": (
+        "توقيت الصافرة",
+        ["تأخر في إطلاق الصافرة", "تأخر في الصافرة", "صافرة متأخرة", "تسرّع في الصافرة"],
+    ),
+    "management": ("إدارة اللاعبين", ["احتجاجات", "السيطرة على", "التواصل مع اللاعبين", "تهدئة"]),
+}
+NOTES = [
+    "كان الحكم بعيداً عن الحالة عند احتكاك منطقة الجزاء في الدقيقة ٣٤، وزاوية رؤية غير مناسبة "
+    "حجبت عنه لمسة اليد. تأخر في إطلاق الصافرة بعد الالتحام، مما سمح بتصاعد احتجاجات اللاعبين.",
+    "أداء جيد في السيطرة على المباراة في الشوط الأول. في الشوط الثاني لوحظ التمركز خلف اللعب في "
+    "الهجمات المرتدة، وصافرة متأخرة في حالتين كان يمكن فيهما تطبيق الميزة بشكل أفضل.",
+    "تواصل واضح مع المساعدين. التواصل مع اللاعبين كان هادئاً وساعد على تهدئة الأجواء بعد الهدف، "
+    "مع ملاحظة تسرّع في الصافرة في حالة كان يمكن فيها ترك اللعب.",
+]
+
+
+def annotate(text: str) -> list[dict]:
+    """Find the theme phrases in a note; returns non-overlapping spans.
+
+    >>> [s["theme"] for s in annotate("وقف بعيداً عن الحالة ثم تأخر في الصافرة")]
+    ['positioning', 'timing']
+    """
+    spans = []
+    for theme, (_, phrases) in NOTE_THEMES.items():
+        for phrase in sorted(phrases, key=len, reverse=True):
+            start = text.find(phrase)
+            while start != -1:
+                end = start + len(phrase)
+                if all(end <= s["start"] or start >= s["end"] for s in spans):
+                    spans.append({"start": start, "end": end, "theme": theme})
+                start = text.find(phrase, end)
+    return sorted(spans, key=lambda s: s["start"])
+
+
+def _pct(x: float) -> str:
+    """0.71 -> '٧١٪' (Arabic-Indic digits, as on the page)."""
+    return str(round(x * 100)).translate(str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩")) + "٪"
+
+
+def _profile(rng: random.Random) -> dict:
+    """Share of correct decisions per case type and month for one referee."""
+    base = {
+        "لمسة اليد": 0.66,
+        "التسلل": 0.9,
+        "ركلات الجزاء": 0.74,
+        "الإنذارات": 0.83,
+        "الطرد": 0.86,
+        "قانون الميزة": 0.79,
+    }
+    trend = {
+        "لمسة اليد": 0.025,
+        "التسلل": 0.004,
+        "ركلات الجزاء": -0.012,
+        "الإنذارات": 0.01,
+        "الطرد": 0.0,
+        "قانون الميزة": 0.012,
+    }
+    grid = []
+    for t in CASE_TYPES:
+        row = []
+        for i, _ in enumerate(PERIODS):
+            v = base[t] + trend[t] * i + rng.uniform(-0.03, 0.03)
+            row.append(round(min(0.98, max(0.5, v)), 2))
+        grid.append({"type": t, "values": row})
+    pen = next(r["values"] for r in grid if r["type"] == "ركلات الجزاء")
+    hand = next(r["values"] for r in grid if r["type"] == "لمسة اليد")
+    return {
+        "referee": REFEREES[0],
+        "periods": PERIODS,
+        "grid": grid,
+        "plan": [
+            {
+                "focus": "ركلات الجزاء",
+                "why": f"الدقة تنخفض منذ ديسمبر (من {_pct(pen[4])} إلى {_pct(pen[-1])})",
+                "content": [
+                    "محاضرة: الاحتكاك داخل المنطقة، ١٨ دقيقة",
+                    "١٢ حالة فيديو من هذا الموسم",
+                ],
+            },
+            {
+                "focus": "لمسة اليد",
+                "why": f"أكبر تحسن هذا الموسم (من {_pct(hand[0])} إلى {_pct(hand[-1])})",
+                "content": ["استمرار: اختبار قصير كل شهر"],
+            },
+        ],
+    }
+
+
+def _nlp(rng: random.Random) -> dict:
+    notes = [{"text": t, "spans": annotate(t)} for t in NOTES]
+    totals = {"positioning": 61, "timing": 44, "management": 27}  # over 120 example reports
+    return {
+        "notes": notes,
+        "themes": {k: v[0] for k, v in NOTE_THEMES.items()},
+        "totals": totals,
+        "reports": 120,
+    }
+
+
+def _var_timeline() -> list[dict]:
+    return [
+        {"t": 0, "label": "رصد الحالة"},
+        {"t": 14, "label": "فحص الزوايا"},
+        {"t": 38, "label": "التوصية بالمراجعة"},
+        {"t": 51, "label": "الحكم أمام الشاشة"},
+        {"t": 83, "label": "القرار النهائي"},
+    ]
+
+
+def _pilots(rng: random.Random) -> dict:
+    training = {
+        "topic": "لمسة اليد",
+        "groups": [
+            {
+                "group": "حضروا المحاضرة",
+                "before": 0.67,
+                "after": 0.79,
+                "lo": 0.72,
+                "hi": 0.85,
+                "n": 14,
+            },
+            {
+                "group": "لم يحضروا بعد",
+                "before": 0.68,
+                "after": 0.70,
+                "lo": 0.62,
+                "hi": 0.77,
+                "n": 11,
+            },
+        ],
+    }
+    talent = []
+    for name, start, slope in (
+        ("الحكم ز", 6.9, 0.11),
+        ("الحكم ح", 7.3, 0.01),
+        ("الحكم ط", 7.0, 0.04),
+    ):
+        talent.append(
+            {
+                "name": name,
+                "marks": [
+                    round(start + slope * i + rng.uniform(-0.12, 0.12), 2) for i in range(10)
+                ],
+            }
+        )
+    fatigue = [
+        {"bin": b, "accuracy": a}
+        for b, a in zip(
+            ["٠–١٥", "١٥–٣٠", "٣٠–٤٥", "٤٥–٦٠", "٦٠–٧٥", "٧٥–٩٠+"],
+            (0.86, 0.85, 0.84, 0.84, 0.81, 0.76),
+            strict=True,
+        )
+    ]
+    assessors = []
+    for name, mid, spread in (
+        ("المقيّم ١", 7.9, 0.5),
+        ("المقيّم ٢", 7.6, 0.4),
+        ("المقيّم ٣", 8.4, 0.3),
+        ("المقيّم ٤", 7.7, 0.6),
+        ("المقيّم ٥", 7.2, 0.4),
+    ):
+        assessors.append(
+            {
+                "name": name,
+                "low": round(mid - 2 * spread, 1),
+                "q1": round(mid - spread, 1),
+                "median": mid,
+                "q3": round(mid + spread, 1),
+                "high": round(mid + 2 * spread, 1),
+            }
+        )
+    return {"training": training, "talent": talent, "fatigue": fatigue, "assessors": assessors}
+
+
+def vision() -> dict:
+    """Data for the vision tab, from its own fixed seed.
+
+    >>> v = vision()
+    >>> sorted(v) == ["nlp", "pilots", "profile", "var_timeline"]
+    True
+    """
+    rng = random.Random(SEED + 1)
+    return {
+        "profile": _profile(rng),
+        "nlp": _nlp(rng),
+        "var_timeline": _var_timeline(),
+        "pilots": _pilots(rng),
     }
